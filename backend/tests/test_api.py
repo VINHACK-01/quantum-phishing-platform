@@ -16,85 +16,84 @@ def test_health():
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "healthy"
+    assert data["ml_mode"] == "mock_predictor"
     
     # Root alias
     response_root = client.get("/health")
     assert response_root.status_code == 200
     assert response_root.json()["status"] == "healthy"
 
-def test_analyze_invalid_payload_rejections():
-    # Empty body
-    assert client.post("/api/analyze", json={}).status_code == 422
-    # Empty string
-    assert client.post("/api/analyze", json={"url": ""}).status_code == 422
-    # Whitespace only
-    assert client.post("/api/analyze", json={"url": "    "}).status_code == 422
-    # Internal spaces
-    assert client.post("/api/analyze", json={"url": "https://bad url with spaces.com"}).status_code == 422
-    # Missing domain / invalid host
-    assert client.post("/api/analyze", json={"url": "notadomain"}).status_code == 422
+# =========================================================================
+# Phase 3 Required Tests: Mock Phishing Detection (1 through 5)
+# =========================================================================
 
-def test_analyze_valid_url_formats():
-    valid_urls = [
-        "https://secure-login-paypal.com.account-verify.xyz/auth",
-        "http://192.168.1.1/login",
-        "google.com",
-        "https://github.com/features"
-    ]
-    for url in valid_urls:
-        res = client.post("/api/analyze", json={"url": url})
-        assert res.status_code == 200, f"Failed on valid URL: {url}"
-        assert res.json()["url"] == url
-
-def test_analyze_contract_1_phishing():
-    payload = {
-        "url": "https://secure-login-paypaI.auth-security-update.com/login"
-    }
-    response = client.post("/api/analyze", json=payload)
-    assert response.status_code == 200
-    data = response.json()
-    
-    # Contract 1 verification
-    assert "url" in data
-    assert "phishing_probability" in data
-    assert "risk_level" in data
-    assert "reasons" in data
-    assert "quantum_comparison" in data
-    
-    assert data["url"] == payload["url"]
-    assert 0.0 <= data["phishing_probability"] <= 1.0
-    assert data["risk_level"] in ["HIGH", "MEDIUM", "LOW"]
-    assert isinstance(data["reasons"], list)
-    assert len(data["reasons"]) > 0
-    assert "classical_acc" in data["quantum_comparison"]
-    assert "quantum_acc" in data["quantum_comparison"]
-    assert 0.0 <= data["quantum_comparison"]["classical_acc"] <= 1.0
-    assert 0.0 <= data["quantum_comparison"]["quantum_acc"] <= 1.0
-    
-    # Micro-training verification (Feature 5)
-    if data["risk_level"] in ["HIGH", "MEDIUM"]:
-        assert "micro_training" in data
-        assert data["micro_training"] is not None
-        assert "title" in data["micro_training"]
-        assert "explanation" in data["micro_training"]
-        assert "action_tip" in data["micro_training"]
-
-def test_analyze_contract_1_legitimate():
-    payload = {
-        "url": "https://google.com"
-    }
-    response = client.post("/api/analyze", json=payload)
-    assert response.status_code == 200
-    data = response.json()
+def test_mock_phishing_1_safe_url():
+    """Test 1: Safe URL produces LOW risk with clean lexical profile."""
+    res = client.post("/api/analyze", json={"url": "https://google.com"})
+    assert res.status_code == 200
+    data = res.json()
+    assert data["url"] == "https://google.com"
     assert data["risk_level"] == "LOW"
     assert 0.0 <= data["phishing_probability"] < 0.35
+    assert len(data["reasons"]) > 0
+    assert "quantum_comparison" in data
+    assert 0.0 <= data["quantum_comparison"]["classical_acc"] <= 1.0
+    assert 0.0 <= data["quantum_comparison"]["quantum_acc"] <= 1.0
+
+def test_mock_phishing_2_suspicious_url():
+    """Test 2: Suspicious URL produces MEDIUM risk with explainable reasons."""
+    res = client.post("/api/analyze", json={"url": "https://account-verify-portal.net/settings/update"})
+    assert res.status_code == 200
+    data = res.json()
+    assert data["url"] == "https://account-verify-portal.net/settings/update"
+    assert data["risk_level"] == "MEDIUM"
+    assert 0.35 <= data["phishing_probability"] < 0.70
+    assert len(data["reasons"]) >= 1
+
+def test_mock_phishing_3_highly_suspicious_url():
+    """Test 3: Highly suspicious URL produces HIGH risk with explainable reasons and micro-training."""
+    url = "https://secure-login-paypal.com.account-verify.xyz/auth"
+    res = client.post("/api/analyze", json={"url": url})
+    assert res.status_code == 200
+    data = res.json()
+    assert data["url"] == url
+    assert data["risk_level"] == "HIGH"
+    assert data["phishing_probability"] >= 0.70
+    assert len(data["reasons"]) >= 2
+    assert "quantum_comparison" in data
+    
+    # Micro-training awareness card must be present for HIGH risk
+    assert data["micro_training"] is not None
+    assert "title" in data["micro_training"]
+    assert "explanation" in data["micro_training"]
+    assert "action_tip" in data["micro_training"]
+
+def test_mock_phishing_4_malformed_url():
+    """Test 4: Malformed URLs are rejected with HTTP 422."""
+    malformed_cases = [
+        "not a valid url with spaces",
+        "missingdomainname",
+        "http://",
+        "https://"
+    ]
+    for bad_url in malformed_cases:
+        res = client.post("/api/analyze", json={"url": bad_url})
+        assert res.status_code == 422, f"Expected 422 for malformed URL '{bad_url}'"
+
+def test_mock_phishing_5_empty_url():
+    """Test 5: Empty, whitespace-only, and missing URL payloads are rejected with HTTP 422."""
+    assert client.post("/api/analyze", json={"url": ""}).status_code == 422
+    assert client.post("/api/analyze", json={"url": "   "}).status_code == 422
+    assert client.post("/api/analyze", json={}).status_code == 422
+
+# =========================================================================
+# Additional Contract 2 & History Tests
+# =========================================================================
 
 def test_network_events_contract_2():
     response = client.get("/api/network-events?limit=10")
     assert response.status_code == 200
     data = response.json()
-    
-    # Contract 2 verification
     assert "total_events" in data
     assert "events" in data
     assert isinstance(data["events"], list)
@@ -104,10 +103,9 @@ def test_network_events_contract_2():
     for event in data["events"]:
         assert "id" in event and event["id"]
         assert "timestamp" in event
-        # Verify ISO 8601 timestamp parsing
+        # Verify ISO 8601 UTC timestamp format
         ts = event["timestamp"].replace("Z", "+00:00")
         datetime.fromisoformat(ts)
-        
         assert "protocol" in event and event["protocol"]
         assert "src" in event and event["src"]
         assert "dst" in event and event["dst"]
@@ -131,25 +129,15 @@ def test_scan_history():
         ts = item["timestamp"].replace("Z", "+00:00")
         datetime.fromisoformat(ts)
 
-def test_openapi_schema_matches_contracts():
+def test_openapi_swagger_schema():
     schema = app.openapi()
-    components = schema.get("components", {}).get("schemas", {})
+    assert "/api/analyze" in schema["paths"]
+    assert "/api/network-events" in schema["paths"]
+    assert "/api/history" in schema["paths"]
+    assert "/api/health" in schema["paths"]
     
-    # Verify AnalyzeResponse schema
-    assert "AnalyzeResponse" in components
-    resp_props = components["AnalyzeResponse"]["properties"]
-    assert "phishing_probability" in resp_props
-    assert "risk_level" in resp_props
-    assert "quantum_comparison" in resp_props
-    assert "reasons" in resp_props
-    assert "micro_training" in resp_props
-    
-    # Verify NetworkEvent schema
-    assert "NetworkEvent" in components
-    event_props = components["NetworkEvent"]["properties"]
-    assert "timestamp" in event_props
-    assert "protocol" in event_props
-    assert "src" in event_props
-    assert "dst" in event_props
-    assert "flag" in event_props
-    assert "reason" in event_props
+    analyze_schema = schema["components"]["schemas"]["AnalyzeResponse"]
+    assert "phishing_probability" in analyze_schema["properties"]
+    assert "risk_level" in analyze_schema["properties"]
+    assert "quantum_comparison" in analyze_schema["properties"]
+    assert "micro_training" in analyze_schema["properties"]

@@ -1,3 +1,4 @@
+import re
 from typing import Optional, List
 from app.schemas.analyze import MicroTraining
 
@@ -56,7 +57,7 @@ def get_micro_training_for_reasons(reasons: List[str]) -> Optional[MicroTraining
         
     combined_reasons = " ".join(reasons).lower()
     for module in AWARENESS_MODULES:
-        if any(keyword in combined_reasons for keyword in module["keywords"]):
+        if any(re.search(rf"\b{re.escape(keyword)}\b", combined_reasons) for keyword in module["keywords"]):
             return module["training"]
             
     return DEFAULT_TRAINING

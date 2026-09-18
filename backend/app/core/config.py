@@ -24,4 +24,16 @@ class Settings:
     # Feature toggle for real vs mock model
     USE_REAL_MODEL: bool = False
 
+    # Centralized and configurable risk classification thresholds
+    RISK_THRESHOLD_HIGH: float = 0.70
+    RISK_THRESHOLD_MEDIUM: float = 0.35
+
+    def classify_risk(self, probability: float) -> str:
+        """Centralized risk level determination based on probability score."""
+        if probability >= self.RISK_THRESHOLD_HIGH:
+            return "HIGH"
+        elif probability >= self.RISK_THRESHOLD_MEDIUM:
+            return "MEDIUM"
+        return "LOW"
+
 settings = Settings()

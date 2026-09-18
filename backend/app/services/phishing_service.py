@@ -1,5 +1,5 @@
 from app.schemas.analyze import AnalyzeRequest, AnalyzeResponse
-from app.services.ml_adapter import ml_engine
+from app.services.ml_adapter import ml_adapter
 from app.services.quantum_service import quantum_service
 from app.services.awareness_service import get_micro_training_for_reasons
 from app.core.history import history_store
@@ -8,8 +8,8 @@ class PhishingAnalysisService:
     def analyze(self, request: AnalyzeRequest) -> AnalyzeResponse:
         url = request.url.strip()
         
-        # 1. Run inference (ML model or intelligent fallback)
-        probability, risk_level, reasons = ml_engine.predict(url)
+        # 1. Run inference via ML adapter (delegates to mock predictor during Phase 3)
+        probability, risk_level, reasons = ml_adapter.predict(url)
         
         # 2. Retrieve honest quantum benchmark comparison
         quantum_comp = quantum_service.get_comparison()

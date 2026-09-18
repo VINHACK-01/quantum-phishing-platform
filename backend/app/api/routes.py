@@ -17,7 +17,8 @@ def health_check():
     return {
         "status": "healthy",
         "service": "sentinelai-backend",
-        "phase": "phase-1-architecture"
+        "phase": "phase-3-mock-phishing",
+        "ml_mode": "mock_predictor"
     }
 
 @router.post("/analyze", response_model=AnalyzeResponse, summary="Analyze URL for Phishing Threats (Contract 1)")
