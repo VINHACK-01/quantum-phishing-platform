@@ -1,7 +1,8 @@
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 /**
- * Helper to handle fetch responses and handle JSON parsing or HTTP errors
+ * Generic fetch wrapper with standardized error handling.
+ * Ensures clean human-readable error messages and prevents raw exception leaks.
  */
 async function fetchJson(endpoint, options = {}) {
   const url = `${BASE_URL}${endpoint}`;
@@ -15,35 +16,46 @@ async function fetchJson(endpoint, options = {}) {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+      let errorMessage = `Server error (${response.status} ${response.statusText})`;
       try {
-        const errorJson = JSON.parse(errorText);
-        if (errorJson.detail) {
-          errorMessage = typeof errorJson.detail === 'string' 
-            ? errorJson.detail 
-            : JSON.stringify(errorJson.detail);
+        const errorText = await response.text();
+        if (errorText) {
+          try {
+            const errorJson = JSON.parse(errorText);
+            if (errorJson.detail) {
+              errorMessage = typeof errorJson.detail === 'string'
+                ? errorJson.detail
+                : JSON.stringify(errorJson.detail);
+            }
+          } catch {
+            errorMessage = errorText;
+          }
         }
       } catch {
-        // Fallback to text if not JSON
-        if (errorText) errorMessage = errorText;
+        // Fallback to HTTP status message
       }
       throw new Error(errorMessage);
     }
 
     return await response.json();
   } catch (err) {
-    console.error(`API Request failed for [${endpoint}]:`, err);
+    if (err.name === 'TypeError' || err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+      throw new Error(`Unable to connect to backend server at ${BASE_URL}. Please ensure FastAPI is running.`);
+    }
     throw err;
   }
 }
 
 /**
- * Analyzes a URL for phishing threats and quantum comparisons.
- * @param {string} url - The URL to analyze
- * @returns {Promise<Object>} The analysis payload
+ * Submits a URL for phishing & threat analysis (Contract 1).
+ * POST /api/analyze
+ * @param {string} url - Target URL to analyze
+ * @returns {Promise<Object>} Analysis response payload
  */
 export async function analyzeUrl(url) {
+  if (!url || typeof url !== 'string') {
+    throw new Error('Please enter a valid URL.');
+  }
   return await fetchJson('/api/analyze', {
     method: 'POST',
     body: JSON.stringify({ url }),
@@ -51,8 +63,9 @@ export async function analyzeUrl(url) {
 }
 
 /**
- * Fetches real-time or replayed network events.
- * @returns {Promise<Object>} List of network events
+ * Fetches real-time or replayed network threat events (Contract 2).
+ * GET /api/network-events
+ * @returns {Promise<Object>} Network events payload containing { total_events, events }
  */
 export async function getNetworkEvents() {
   return await fetchJson('/api/network-events', {
@@ -61,8 +74,9 @@ export async function getNetworkEvents() {
 }
 
 /**
- * Fetches recent scan history log.
- * @returns {Promise<Object>} History scans list
+ * Fetches the recent scan history log (Contract 3).
+ * GET /api/history
+ * @returns {Promise<Object>} History payload containing { scans }
  */
 export async function getHistory() {
   return await fetchJson('/api/history', {
@@ -72,7 +86,8 @@ export async function getHistory() {
 
 /**
  * Checks backend health status.
- * @returns {Promise<boolean>} True if backend is online and healthy
+ * GET /health or GET /api/health
+ * @returns {Promise<boolean>} True if backend responds with OK
  */
 export async function getHealth() {
   try {

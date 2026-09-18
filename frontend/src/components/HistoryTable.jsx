@@ -20,18 +20,18 @@ export default function HistoryTable({ historyData, onSelectScan, isLoading }) {
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-lg border border-slate-800 bg-slate-950/70">
+      <div className="overflow-x-auto rounded-lg border border-slate-800/80 bg-slate-950/80">
         <table className="w-full text-left border-collapse text-xs">
           <thead>
             <tr className="bg-slate-900 border-b border-slate-800 text-slate-400 uppercase text-[10px] font-bold tracking-wider">
               <th className="py-2.5 px-3">Scan ID</th>
-              <th className="py-2.5 px-3">Target URL</th>
+              <th className="py-2.5 px-3">Target Domain URL</th>
               <th className="py-2.5 px-3">Risk Assessment</th>
               <th className="py-2.5 px-3">Probability</th>
               <th className="py-2.5 px-3">Timestamp</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-800/60 font-mono">
+          <tbody className="divide-y divide-slate-800/50 font-mono tracking-tight">
             {scans.length > 0 ? (
               scans.map((scan) => {
                 const rawProb = typeof scan.phishing_probability === 'number' ? scan.phishing_probability : 0;
@@ -73,7 +73,7 @@ export default function HistoryTable({ historyData, onSelectScan, isLoading }) {
             ) : (
               <tr>
                 <td colSpan={5} className="py-8 text-center text-slate-500 font-sans text-xs">
-                  {isLoading ? 'Loading scan history...' : 'No recent scans found.'}
+                  {isLoading ? 'Loading scan history...' : 'No recent scans found in FIFO queue.'}
                 </td>
               </tr>
             )}

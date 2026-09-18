@@ -1,7 +1,7 @@
 export default function MicroTraining({ trainingData }) {
   if (!trainingData) {
     return (
-      <div className="glass-panel p-5 shadow-xl border border-slate-800">
+      <div className="glass-panel p-5 shadow-xl border border-slate-800 border-l-4 border-l-slate-700">
         <div className="flex items-center gap-2 mb-2">
           <span className="p-1.5 bg-slate-900 text-indigo-400 rounded border border-slate-800">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -20,7 +20,7 @@ export default function MicroTraining({ trainingData }) {
   const { title, explanation, action_tip } = trainingData;
 
   return (
-    <div className="glass-panel p-5 shadow-xl border border-slate-800 space-y-3">
+    <div className="glass-panel p-5 shadow-xl border border-slate-800 border-l-4 border-l-indigo-500 space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="p-1.5 bg-indigo-950 text-indigo-400 rounded border border-indigo-800/80">
@@ -30,16 +30,16 @@ export default function MicroTraining({ trainingData }) {
           </span>
           <h3 className="text-sm font-bold text-slate-100">Security Awareness Micro-Module</h3>
         </div>
-        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800">
-          Targeted Defense
+        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800 uppercase font-semibold">
+          Contextual Defense
         </span>
       </div>
 
-      <div className="bg-slate-950/70 p-3.5 rounded-lg border border-slate-900 space-y-2">
+      <div className="bg-slate-950/80 p-4 rounded-lg border border-slate-900 space-y-3">
         {title && (
           <div>
-            <span className="text-[10px] uppercase font-bold tracking-wider text-indigo-400">Threat Vector</span>
-            <h4 className="text-xs font-semibold text-slate-200 mt-0.5">{title}</h4>
+            <span className="text-[10px] uppercase font-bold tracking-wider text-indigo-400 block">Identified Threat Vector</span>
+            <h4 className="text-xs font-bold text-slate-200 mt-0.5">{title}</h4>
           </div>
         )}
 
@@ -50,12 +50,12 @@ export default function MicroTraining({ trainingData }) {
         )}
 
         {action_tip && (
-          <div className="pt-2 border-t border-slate-900 flex items-start gap-2">
+          <div className="p-3 bg-emerald-950/20 rounded-lg border border-emerald-900/40 flex items-start gap-2.5">
             <svg className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <div className="text-xs text-emerald-300">
-              <span className="font-semibold text-emerald-400">Action Tip: </span>
+              <strong className="text-emerald-400 block mb-0.5 uppercase text-[10px] tracking-wider">Actionable Security Tip</strong>
               {action_tip}
             </div>
           </div>

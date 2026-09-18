@@ -15,20 +15,20 @@ export default function NetworkVisualizer({ networkData, onRefresh, isLoading })
 
   return (
     <div className="glass-panel p-6 shadow-xl border border-slate-800 space-y-4">
-      {/* Table Header Controls */}
+      {/* Table Controls Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <span className="p-1.5 bg-cyan-950 text-cyan-400 rounded border border-cyan-800">
+          <span className="p-1.5 bg-cyan-950 text-cyan-400 rounded border border-cyan-800/80">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
             </svg>
           </span>
           <div>
             <h3 className="text-sm font-bold text-slate-100 flex items-center gap-2">
-              Network Threat Events Log
+              Network Threat Events Stream
               <span className="text-xs font-mono font-normal text-slate-400">({totalEvents} Total)</span>
             </h3>
-            <p className="text-xs text-slate-400">Real-time PCAP traffic analysis feed</p>
+            <p className="text-xs text-slate-400">Real-time PCAP packet inspection log</p>
           </div>
         </div>
 
@@ -64,8 +64,8 @@ export default function NetworkVisualizer({ networkData, onRefresh, isLoading })
         </div>
       </div>
 
-      {/* Network Log Table */}
-      <div className="overflow-x-auto rounded-lg border border-slate-800 bg-slate-950/70">
+      {/* Network Log Table with Suspicious Event Accent Polish */}
+      <div className="overflow-x-auto rounded-lg border border-slate-800/80 bg-slate-950/80">
         <table className="w-full text-left border-collapse text-xs">
           <thead>
             <tr className="bg-slate-900 border-b border-slate-800 text-slate-400 uppercase text-[10px] font-bold tracking-wider">
@@ -75,15 +75,22 @@ export default function NetworkVisualizer({ networkData, onRefresh, isLoading })
               <th className="py-2.5 px-3">Source IP</th>
               <th className="py-2.5 px-3">Destination IP</th>
               <th className="py-2.5 px-3">Flag</th>
-              <th className="py-2.5 px-3">Detected Reason</th>
+              <th className="py-2.5 px-3">Detected Threat Reason</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-800/60 font-mono">
+          <tbody className="divide-y divide-slate-800/50 font-mono tracking-tight">
             {filteredEvents.length > 0 ? (
               filteredEvents.map((evt) => {
                 const isSuspicious = evt.flag?.toLowerCase() === 'suspicious';
                 return (
-                  <tr key={evt.id || evt.timestamp} className="hover:bg-slate-900/60 transition-colors">
+                  <tr
+                    key={evt.id || evt.timestamp}
+                    className={`transition-colors ${
+                      isSuspicious
+                        ? 'bg-red-950/20 hover:bg-red-950/30 border-l-2 border-l-red-500'
+                        : 'hover:bg-slate-900/50 border-l-2 border-l-transparent'
+                    }`}
+                  >
                     <td className="py-2.5 px-3 text-slate-300 font-semibold">{evt.id || 'evt-N/A'}</td>
                     <td className="py-2.5 px-3 text-slate-400 text-[11px]">
                       {evt.timestamp ? (
@@ -115,7 +122,7 @@ export default function NetworkVisualizer({ networkData, onRefresh, isLoading })
             ) : (
               <tr>
                 <td colSpan={7} className="py-8 text-center text-slate-500 font-sans text-xs">
-                  {isLoading ? 'Fetching network events feed...' : 'No network events found matching filter.'}
+                  {isLoading ? 'Fetching network events feed...' : 'No network events match the selected filter.'}
                 </td>
               </tr>
             )}

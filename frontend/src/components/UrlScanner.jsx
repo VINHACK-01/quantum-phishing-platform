@@ -23,9 +23,8 @@ export default function UrlScanner({ onAnalyze, isLoading }) {
     if (!value.trim()) {
       return 'Please enter a URL to analyze.';
     }
-    // Simple URL structure sanity check (must contain at least a domain name or IP)
     if (!value.includes('.') && !value.includes('localhost')) {
-      return 'Please enter a valid URL or domain (e.g. example.com).';
+      return 'Please enter a valid URL or domain name (e.g. example.com).';
     }
     return '';
   };
@@ -63,7 +62,7 @@ export default function UrlScanner({ onAnalyze, isLoading }) {
             URL Threat Inspection
           </h2>
           <p className="text-xs text-slate-400 mt-0.5">
-            Submit a URL to analyze domain structure, brand spoofing keywords, and model indicators.
+            Analyze domain structure, lexical entropy, and brand spoofing indicators.
           </p>
         </div>
       </div>
@@ -77,10 +76,16 @@ export default function UrlScanner({ onAnalyze, isLoading }) {
               onChange={handleInputChange}
               placeholder="Enter URL (e.g., https://secure-login-paypal.com.account-verify.xyz/auth)"
               disabled={isLoading}
-              className={`w-full px-4 py-3 bg-slate-950 border ${
-                validationError ? 'border-red-500/80 focus:border-red-500' : 'border-slate-800 focus:border-cyan-500'
-              } rounded-lg text-slate-100 text-sm placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-500 transition-all font-mono`}
+              className={`w-full px-4 py-3 pr-16 bg-slate-950 border ${
+                validationError ? 'border-red-500/80 focus:border-red-500' : 'border-slate-800 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50'
+              } rounded-lg text-slate-100 text-sm placeholder-slate-500 focus:outline-none transition-all font-mono`}
             />
+            {/* Keyboard Hint Pill */}
+            {!inputUrl && (
+              <span className="hidden md:inline-block absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-900 text-slate-500 border border-slate-800 pointer-events-none">
+                Enter ↵
+              </span>
+            )}
             {inputUrl && (
               <button
                 type="button"
@@ -88,7 +93,7 @@ export default function UrlScanner({ onAnalyze, isLoading }) {
                   setInputUrl('');
                   setValidationError('');
                 }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 text-xs"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 text-xs font-sans"
               >
                 Clear
               </button>
@@ -118,7 +123,7 @@ export default function UrlScanner({ onAnalyze, isLoading }) {
           </button>
         </div>
         {validationError && (
-          <p className="text-xs text-red-400 mt-2 flex items-center gap-1">
+          <p className="text-xs text-red-400 mt-2 flex items-center gap-1 font-sans">
             <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01" />
             </svg>
@@ -136,7 +141,7 @@ export default function UrlScanner({ onAnalyze, isLoading }) {
             type="button"
             onClick={() => handleSelectPreset(preset.url)}
             disabled={isLoading}
-            className="px-2.5 py-1 text-xs rounded bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 transition-colors cursor-pointer"
+            className="px-2.5 py-1 text-xs rounded-md bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 hover:border-slate-700 transition-colors cursor-pointer"
           >
             {preset.label}
           </button>

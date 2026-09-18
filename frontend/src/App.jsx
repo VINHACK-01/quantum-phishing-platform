@@ -22,99 +22,100 @@ export default function App() {
   const [connectionStatus, setConnectionStatus] = useState('Connecting'); // 'Connected' | 'Connecting' | 'Offline'
   const [activeTab, setActiveTab] = useState('network'); // 'network' | 'history'
 
-  // Backend Health Status Check
+  // Backend Health Check
   const checkHealth = useCallback(async () => {
     try {
       const isOk = await getHealth();
       setConnectionStatus(isOk ? 'Connected' : 'Offline');
+      return isOk;
     } catch {
       setConnectionStatus('Offline');
+      return false;
     }
   }, []);
 
-  // Network Events Fetcher
-  const fetchNetworkEvents = useCallback(async () => {
-    setLoadingNetwork(true);
+  // Fetch Network Events (supports silent background polling to prevent UI flashing)
+  const fetchNetworkEvents = useCallback(async (isSilent = false) => {
+    if (!isSilent) setLoadingNetwork(true);
     try {
       const data = await getNetworkEvents();
       setNetworkData(data);
+      setConnectionStatus('Connected');
     } catch (err) {
-      console.warn('Network events fetch warning:', err.message);
+      console.warn('Network events polling warning:', err.message);
     } finally {
-      setLoadingNetwork(false);
+      if (!isSilent) setLoadingNetwork(false);
     }
   }, []);
 
-  // History Fetcher
-  const fetchHistory = useCallback(async () => {
-    setLoadingHistory(true);
+  // Fetch Scan History
+  const fetchHistory = useCallback(async (isSilent = false) => {
+    if (!isSilent) setLoadingHistory(true);
     try {
       const data = await getHistory();
       setHistoryData(data);
     } catch (err) {
       console.warn('Scan history fetch warning:', err.message);
     } finally {
-      setLoadingHistory(false);
+      if (!isSilent) setLoadingHistory(false);
     }
   }, []);
 
-  // Manual Sync Button Handler
+  // Manual Refresh Handler
   const handleRefreshAll = () => {
     checkHealth();
-    fetchNetworkEvents();
-    fetchHistory();
+    fetchNetworkEvents(false);
+    fetchHistory(false);
   };
 
-  // Initial Data Sync on Mount
+  // Initial Data Sync on Mount & 5-Second Network Polling
   useEffect(() => {
     let isMounted = true;
 
-    async function loadInitialData() {
-      try {
-        const isOk = await getHealth();
-        if (isMounted) setConnectionStatus(isOk ? 'Connected' : 'Offline');
-      } catch {
-        if (isMounted) setConnectionStatus('Offline');
+    // Initial load
+    async function initDashboard() {
+      const isHealthy = await checkHealth();
+      if (isMounted) {
+        if (isHealthy) setConnectionStatus('Connected');
+        else setConnectionStatus('Offline');
       }
-
-      setLoadingNetwork(true);
-      setLoadingHistory(true);
-
-      try {
-        const netData = await getNetworkEvents();
-        if (isMounted) setNetworkData(netData);
-      } catch (err) {
-        console.warn('Network events fetch warning:', err.message);
-      } finally {
-        if (isMounted) setLoadingNetwork(false);
-      }
-
-      try {
-        const histData = await getHistory();
-        if (isMounted) setHistoryData(histData);
-      } catch (err) {
-        console.warn('Scan history fetch warning:', err.message);
-      } finally {
-        if (isMounted) setLoadingHistory(false);
-      }
+      fetchNetworkEvents(false);
+      fetchHistory(false);
     }
 
-    loadInitialData();
+    initDashboard();
+
+    // 5-second non-blocking background polling for Network Threat Events
+    const networkPollInterval = setInterval(() => {
+      if (isMounted) {
+        fetchNetworkEvents(true);
+      }
+    }, 5000);
+
+    // 15-second health check polling
+    const healthCheckInterval = setInterval(() => {
+      if (isMounted) {
+        checkHealth();
+      }
+    }, 15000);
 
     return () => {
       isMounted = false;
+      clearInterval(networkPollInterval);
+      clearInterval(healthCheckInterval);
     };
-  }, []);
+  }, [checkHealth, fetchNetworkEvents, fetchHistory]);
 
-  // Main URL Analysis Handler
+  // Main URL Threat Analysis Handler
   const handleAnalyze = async (url) => {
     setLoadingScan(true);
     setScanError(null);
     try {
       const result = await analyzeUrl(url);
       setScanResult(result);
-      // Automatically refresh history to reflect new scan in queue
-      fetchHistory();
+      setConnectionStatus('Connected');
+      // Immediately refresh scan history queue without full page reload
+      fetchHistory(true);
     } catch (err) {
       setScanError(err.message || 'Unable to perform URL threat analysis.');
       setScanResult(null);
@@ -131,7 +132,7 @@ export default function App() {
       {/* DASHBOARD PAGE CONTAINER */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         
-        {/* URL THREAT ANALYSIS & ANALYSIS RESULTS (Side-by-side on desktop, stacked on mobile) */}
+        {/* URL THREAT ANALYSIS & ANALYSIS RESULTS */}
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           <div className="lg:col-span-6 space-y-6">
             <UrlScanner onAnalyze={handleAnalyze} isLoading={loadingScan} />
@@ -173,12 +174,13 @@ export default function App() {
             {activeTab === 'network' ? (
               <NetworkVisualizer
                 networkData={networkData}
-                onRefresh={fetchNetworkEvents}
+                onRefresh={() => fetchNetworkEvents(false)}
                 isLoading={loadingNetwork}
               />
             ) : (
               <HistoryTable
                 historyData={historyData}
+                onSelectScan={(scan) => scan?.url && handleAnalyze(scan.url)}
                 isLoading={loadingHistory}
               />
             )}

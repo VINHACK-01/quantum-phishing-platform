@@ -13,7 +13,7 @@ export default function QuantumComparison({ comparisonData }) {
           </div>
         </div>
         <p className="text-xs text-slate-500">
-          Classical vs. Quantum VQC model accuracy metrics will be visualized here once a URL scan is performed.
+          Classical Random Forest vs. Quantum VQC accuracy metrics will be visualized here upon URL analysis.
         </p>
       </div>
     );
@@ -21,8 +21,11 @@ export default function QuantumComparison({ comparisonData }) {
 
   const { classical_acc, quantum_acc } = comparisonData;
 
-  const classicalPercent = typeof classical_acc === 'number' ? Math.round(classical_acc * 100) : 0;
-  const quantumPercent = typeof quantum_acc === 'number' ? Math.round(quantum_acc * 100) : 0;
+  const classicalVal = typeof classical_acc === 'number' ? classical_acc : 0;
+  const quantumVal = typeof quantum_acc === 'number' ? quantum_acc : 0;
+
+  const classicalPercent = (classicalVal * 100).toFixed(1);
+  const quantumPercent = (quantumVal * 100).toFixed(1);
 
   return (
     <div className="glass-panel p-5 shadow-xl border border-slate-800 space-y-3">
@@ -34,51 +37,53 @@ export default function QuantumComparison({ comparisonData }) {
             </svg>
           </span>
           <div>
-            <h3 className="text-sm font-bold text-slate-100">Quantum vs. Classical Accuracy</h3>
-            <p className="text-[11px] text-slate-400">Benchmark comparison of underlying classifier metrics</p>
+            <h3 className="text-sm font-bold text-slate-100">Quantum vs. Classical Classifier Benchmark</h3>
+            <p className="text-[11px] text-slate-400">PennyLane Variational Quantum Classifier (VQC) evaluation</p>
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {/* Classical RF */}
-        <div className="bg-slate-950/80 p-3.5 rounded-lg border border-slate-900 space-y-1.5">
+        {/* Classical RF Model */}
+        <div className="bg-slate-950/80 p-3.5 rounded-lg border border-blue-900/40 space-y-2">
           <div className="flex justify-between items-center text-xs">
             <span className="font-semibold text-blue-400 flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-              Classical Model
+              Classical Classifier (RF)
             </span>
-            <span className="font-mono text-slate-200 font-bold">{classicalPercent}%</span>
+            <span className="font-mono text-blue-300 font-bold">{classicalPercent}%</span>
           </div>
-          <div className="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+          <div className="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-blue-950">
             <div
               className="h-full bg-blue-500 rounded-full transition-all duration-500"
-              style={{ width: `${classicalPercent}%` }}
+              style={{ width: `${Math.min(100, Math.max(2, classicalVal * 100))}%` }}
             ></div>
           </div>
-          <p className="text-[10px] text-slate-500 font-mono">
-            classical_acc: {classical_acc}
-          </p>
+          <div className="flex justify-between items-center text-[10px] font-mono text-slate-500 pt-0.5">
+            <span>Accuracy metric</span>
+            <span className="text-slate-400 font-semibold">{classicalVal}</span>
+          </div>
         </div>
 
-        {/* Quantum VQC */}
-        <div className="bg-slate-950/80 p-3.5 rounded-lg border border-slate-900 space-y-1.5">
+        {/* Quantum VQC Model */}
+        <div className="bg-slate-950/80 p-3.5 rounded-lg border border-purple-900/40 space-y-2">
           <div className="flex justify-between items-center text-xs">
             <span className="font-semibold text-purple-400 flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-purple-500"></span>
               Quantum VQC Model
             </span>
-            <span className="font-mono text-slate-200 font-bold">{quantumPercent}%</span>
+            <span className="font-mono text-purple-300 font-bold">{quantumPercent}%</span>
           </div>
-          <div className="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+          <div className="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-purple-950">
             <div
               className="h-full bg-purple-500 rounded-full transition-all duration-500"
-              style={{ width: `${quantumPercent}%` }}
+              style={{ width: `${Math.min(100, Math.max(2, quantumVal * 100))}%` }}
             ></div>
           </div>
-          <p className="text-[10px] text-slate-500 font-mono">
-            quantum_acc: {quantum_acc}
-          </p>
+          <div className="flex justify-between items-center text-[10px] font-mono text-slate-500 pt-0.5">
+            <span>Accuracy metric</span>
+            <span className="text-slate-400 font-semibold">{quantumVal}</span>
+          </div>
         </div>
       </div>
     </div>
