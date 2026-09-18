@@ -20,15 +20,17 @@ def check_brand_keywords(url: str) -> int:
     return sum(1 for brand in brands if brand in url_lower)
 
 def extract_features(url: str) -> list:
+    """Combines structural, lexical, entropy, and keyword features into a flat numerical vector."""
     url_str = str(url)
     url_len = len(url_str)
     
-    # Base character counts matching your notebook pipeline
+    # Special character and symbol counts expected by the model matrix
     features_list = ['@', '?', '-', '=', '.', '#', '%', '+', '$', '!', '*', ',', '//']
     counts = [url_str.count(char) for char in features_list]
     
-    # Enhanced security features
+    # Advanced metrics
     entropy = calculate_entropy(url_str)
     brand_count = check_brand_keywords(url_str)
     
+    # Complete feature vector matching training structure
     return [url_len] + counts + [entropy, brand_count]
