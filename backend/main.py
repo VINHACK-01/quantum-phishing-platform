@@ -1,53 +1,13 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+import os
+import sys
 
-app = FastAPI(
-    title="Quantum Phishing Platform API",
-    description="Backend API for phishing URL detection and cyber awareness.",
-    version="1.0.0"
-)
+# Ensure backend directory is in python path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
 
-# Allow the React frontend to communicate with the backend
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+from app.main import app
 
-
-@app.get("/")
-def root():
-    return {
-        "message": "Quantum Phishing Platform API is running"
-    }
-
-
-@app.get("/health")
-def health():
-    return {
-        "status": "healthy"
-    }
-
-
-@app.post("/analyze")
-def analyze_url(data: dict):
-    """
-    Temporary mock endpoint.
-    The real ML model will be connected later by the backend/ML team.
-    """
-
-    url = data.get("url", "")
-
-    return {
-        "url": url,
-        "probability": 0.91,
-        "risk_level": "HIGH",
-        "threat_level": "Phishing",
-        "reasons": [
-            "Suspicious URL structure",
-            "Login-related keyword detected",
-            "Unusual number of subdomains"
-        ]
-    }
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
