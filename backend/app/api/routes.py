@@ -9,6 +9,17 @@ from app.core.history import history_store
 
 router = APIRouter()
 
+@router.get("/health", summary="System Health Status")
+def health_check():
+    """
+    Returns system health status.
+    """
+    return {
+        "status": "healthy",
+        "service": "sentinelai-backend",
+        "phase": "phase-1-architecture"
+    }
+
 @router.post("/analyze", response_model=AnalyzeResponse, summary="Analyze URL for Phishing Threats (Contract 1)")
 def analyze_url(payload: AnalyzeRequest):
     """

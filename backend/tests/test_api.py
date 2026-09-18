@@ -11,10 +11,19 @@ from app.main import app
 client = TestClient(app)
 
 def test_health():
-    response = client.get("/health")
+    response = client.get("/api/health")
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "healthy"
+    
+    # Root alias
+    response_root = client.get("/health")
+    assert response_root.status_code == 200
+    assert response_root.json()["status"] == "healthy"
+
+def test_analyze_invalid_payload():
+    response = client.post("/api/analyze", json={})
+    assert response.status_code == 422
 
 def test_analyze_contract_1_phishing():
     payload = {

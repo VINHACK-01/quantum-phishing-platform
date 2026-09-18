@@ -29,14 +29,6 @@ def create_app() -> FastAPI:
             "docs": "/docs"
         }
 
-    @app.get("/health", tags=["System"])
-    def health_check():
-        return {
-            "status": "healthy",
-            "service": "sentinelai-backend",
-            "model_mode": "production_ml" if settings.USE_REAL_MODEL else "heuristic_engine"
-        }
-
     # Mount routes under /api and root for maximum client compatibility
     app.include_router(router, prefix="/api", tags=["SentinelAI API"])
     app.include_router(router, tags=["SentinelAI Direct"])

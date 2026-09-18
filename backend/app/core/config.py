@@ -15,12 +15,13 @@ class Settings:
         "*"
     ]
     
-    # Paths for ML & PCAP drop-ins
-    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    MODELS_DIR = os.path.join(BASE_DIR, "data", "models")
-    PCAPS_DIR = os.path.join(BASE_DIR, "data", "pcaps")
+    # Paths for ML & PCAP drop-ins (backend/data/...)
+    APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    BACKEND_DIR = os.path.dirname(APP_DIR)
+    MODELS_DIR = os.path.join(BACKEND_DIR, "data", "models")
+    PCAPS_DIR = os.path.join(BACKEND_DIR, "data", "pcaps")
     
-    # Feature toggle for real vs heuristic model
+    # Feature toggle for real vs mock model
     USE_REAL_MODEL: bool = False
 
 settings = Settings()
