@@ -75,7 +75,7 @@ class NetworkThreatService:
         now = datetime.now(timezone.utc)
         events = []
         for sample in SAMPLE_THREAT_EVENTS[:limit]:
-            event_time = (now - timedelta(seconds=sample["offset_sec"])).isoformat()
+            event_time = (now - timedelta(seconds=sample["offset_sec"])).strftime("%Y-%m-%dT%H:%M:%SZ")
             events.append(NetworkEvent(
                 id=sample["id"],
                 timestamp=event_time,

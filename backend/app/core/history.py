@@ -27,7 +27,7 @@ class HistoryStore:
             "url": url,
             "risk_level": risk_level,
             "phishing_probability": round(phishing_probability, 4),
-            "timestamp": datetime.now(timezone.utc).isoformat()
+            "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         }
         with self._lock:
             self._queue.appendleft(item)
