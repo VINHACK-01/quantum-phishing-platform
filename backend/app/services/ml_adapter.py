@@ -53,22 +53,19 @@ _TARGET_BRANDS: List[str] = [
 # Risk classification — ONE place, configurable thresholds
 # ---------------------------------------------------------------------------
 
-# Thresholds are module-level so they can be read in tests without
-# instantiating anything.
-RISK_THRESHOLD_HIGH: float = 0.70
-RISK_THRESHOLD_MEDIUM: float = 0.35
+# Thresholds are tied directly to centralized settings in app.core.config
+from app.core.config import settings
+
+RISK_THRESHOLD_HIGH: float = settings.RISK_THRESHOLD_HIGH
+RISK_THRESHOLD_MEDIUM: float = settings.RISK_THRESHOLD_MEDIUM
 
 
 def classify_risk(probability: float) -> str:
     """
-    Centralised risk classification.
+    Centralised risk classification delegating to settings.classify_risk.
     Returns "HIGH", "MEDIUM", or "LOW".
     """
-    if probability >= RISK_THRESHOLD_HIGH:
-        return "HIGH"
-    if probability >= RISK_THRESHOLD_MEDIUM:
-        return "MEDIUM"
-    return "LOW"
+    return settings.classify_risk(probability)
 
 
 # ---------------------------------------------------------------------------
@@ -310,7 +307,7 @@ def _build_predictor() -> Predictor:
     from app.core.config import settings
 
     if settings.USE_REAL_MODEL:
-        model_file = os.path.join(settings.MODELS_DIR, "phishing_rf_model.joblib")
+        model_file = settings.MODEL_PATH
         if os.path.isfile(model_file):
             logger.info(
                 f"[ml_adapter] USE_REAL_MODEL=True — loading production model from {model_file}"
