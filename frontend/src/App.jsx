@@ -1,122 +1,195 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useState, useEffect, useCallback } from 'react';
+import Header from './components/common/Header';
+import UrlScanner from './components/UrlScanner';
+import ResultCard from './components/ResultCard';
+import MicroTraining from './components/MicroTraining';
+import QuantumComparison from './components/QuantumComparison';
+import NetworkVisualizer from './components/NetworkVisualizer';
+import HistoryTable from './components/HistoryTable';
+import { analyzeUrl, getNetworkEvents, getHistory, getHealth } from './services/api';
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [scanResult, setScanResult] = useState(null);
+  const [loadingScan, setLoadingScan] = useState(false);
+  const [scanError, setScanError] = useState(null);
+
+  const [networkData, setNetworkData] = useState(null);
+  const [loadingNetwork, setLoadingNetwork] = useState(false);
+
+  const [historyData, setHistoryData] = useState(null);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+
+  const [connectionStatus, setConnectionStatus] = useState('Connecting'); // 'Connected' | 'Connecting' | 'Offline'
+  const [activeTab, setActiveTab] = useState('network'); // 'network' | 'history'
+
+  // Backend Health Status Check
+  const checkHealth = useCallback(async () => {
+    try {
+      const isOk = await getHealth();
+      setConnectionStatus(isOk ? 'Connected' : 'Offline');
+    } catch {
+      setConnectionStatus('Offline');
+    }
+  }, []);
+
+  // Network Events Fetcher
+  const fetchNetworkEvents = useCallback(async () => {
+    setLoadingNetwork(true);
+    try {
+      const data = await getNetworkEvents();
+      setNetworkData(data);
+    } catch (err) {
+      console.warn('Network events fetch warning:', err.message);
+    } finally {
+      setLoadingNetwork(false);
+    }
+  }, []);
+
+  // History Fetcher
+  const fetchHistory = useCallback(async () => {
+    setLoadingHistory(true);
+    try {
+      const data = await getHistory();
+      setHistoryData(data);
+    } catch (err) {
+      console.warn('Scan history fetch warning:', err.message);
+    } finally {
+      setLoadingHistory(false);
+    }
+  }, []);
+
+  // Manual Sync Button Handler
+  const handleRefreshAll = () => {
+    checkHealth();
+    fetchNetworkEvents();
+    fetchHistory();
+  };
+
+  // Initial Data Sync on Mount
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadInitialData() {
+      try {
+        const isOk = await getHealth();
+        if (isMounted) setConnectionStatus(isOk ? 'Connected' : 'Offline');
+      } catch {
+        if (isMounted) setConnectionStatus('Offline');
+      }
+
+      setLoadingNetwork(true);
+      setLoadingHistory(true);
+
+      try {
+        const netData = await getNetworkEvents();
+        if (isMounted) setNetworkData(netData);
+      } catch (err) {
+        console.warn('Network events fetch warning:', err.message);
+      } finally {
+        if (isMounted) setLoadingNetwork(false);
+      }
+
+      try {
+        const histData = await getHistory();
+        if (isMounted) setHistoryData(histData);
+      } catch (err) {
+        console.warn('Scan history fetch warning:', err.message);
+      } finally {
+        if (isMounted) setLoadingHistory(false);
+      }
+    }
+
+    loadInitialData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Main URL Analysis Handler
+  const handleAnalyze = async (url) => {
+    setLoadingScan(true);
+    setScanError(null);
+    try {
+      const result = await analyzeUrl(url);
+      setScanResult(result);
+      // Automatically refresh history to reflect new scan in queue
+      fetchHistory();
+    } catch (err) {
+      setScanError(err.message || 'Unable to perform URL threat analysis.');
+      setScanResult(null);
+    } finally {
+      setLoadingScan(false);
+    }
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-slate-950">
+      {/* HEADER */}
+      <Header connectionStatus={connectionStatus} onRefreshAll={handleRefreshAll} />
 
-      <div className="ticks"></div>
+      {/* DASHBOARD PAGE CONTAINER */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        
+        {/* URL THREAT ANALYSIS & ANALYSIS RESULTS (Side-by-side on desktop, stacked on mobile) */}
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <div className="lg:col-span-6 space-y-6">
+            <UrlScanner onAnalyze={handleAnalyze} isLoading={loadingScan} />
+            <MicroTraining trainingData={scanResult?.micro_training} />
+          </div>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+          <div className="lg:col-span-6 space-y-6">
+            <ResultCard result={scanResult} isLoading={loadingScan} error={scanError} />
+            <QuantumComparison comparisonData={scanResult?.quantum_comparison} />
+          </div>
+        </section>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+        {/* NETWORK THREAT INTELLIGENCE & SCAN HISTORY TABBED PANELS */}
+        <section className="space-y-4">
+          <div className="flex border-b border-slate-900">
+            <button
+              onClick={() => setActiveTab('network')}
+              className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-all border-b-2 cursor-pointer ${
+                activeTab === 'network'
+                  ? 'border-cyan-500 text-cyan-400 bg-slate-900/60'
+                  : 'border-transparent text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              Network Threat Intelligence
+            </button>
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-all border-b-2 cursor-pointer ${
+                activeTab === 'history'
+                  ? 'border-cyan-500 text-cyan-400 bg-slate-900/60'
+                  : 'border-transparent text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              Audit Scan History
+            </button>
+          </div>
+
+          <div>
+            {activeTab === 'network' ? (
+              <NetworkVisualizer
+                networkData={networkData}
+                onRefresh={fetchNetworkEvents}
+                isLoading={loadingNetwork}
+              />
+            ) : (
+              <HistoryTable
+                historyData={historyData}
+                isLoading={loadingHistory}
+              />
+            )}
+          </div>
+        </section>
+      </main>
+
+      {/* FOOTER */}
+      <footer className="border-t border-slate-900 bg-slate-950 py-4 text-center text-xs text-slate-600">
+        SentinelAI — Quantum-Enhanced Phishing Detection & Network Threat Intelligence Platform
+      </footer>
+    </div>
+  );
 }
-
-export default App

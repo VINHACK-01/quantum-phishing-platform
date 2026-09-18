@@ -30,3 +30,9 @@ dist/
 # OS
 .DS_Store
 Thumbs.db
+# Dependencies
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.pyc
