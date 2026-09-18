@@ -40,7 +40,7 @@ def get_network_events(limit: int = Query(50, ge=1, le=200, description="Max num
 @router.get("/history", response_model=ScanHistoryResponse, summary="Recent Scan History (In-Memory)")
 def get_scan_history():
     """
-    Returns the last 10 URL scans in FIFO order without requiring an external database.
+    Returns up to 10 latest URL scans (newest first) without requiring an external database.
     """
     scans = history_store.get_all()
     return ScanHistoryResponse(total=len(scans), scans=scans)
