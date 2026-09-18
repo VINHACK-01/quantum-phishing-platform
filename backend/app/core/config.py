@@ -21,8 +21,9 @@ class Settings:
     MODELS_DIR = os.path.join(BACKEND_DIR, "data", "models")
     PCAPS_DIR = os.path.join(BACKEND_DIR, "data", "pcaps")
     
-    # Feature toggle for real vs mock model
+    # Feature toggle for real vs mock model & PCAP parser
     USE_REAL_MODEL: bool = False
+    USE_REAL_PCAP: bool = False
 
     # Centralized and configurable risk classification thresholds
     RISK_THRESHOLD_HIGH: float = 0.70
