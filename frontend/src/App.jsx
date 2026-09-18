@@ -1,14 +1,3 @@
-<<<<<<< HEAD
-import { useState, useEffect, useCallback } from 'react';
-import Navbar from './components/layout/Navbar';
-import HomeView from './components/views/HomeView';
-import DashboardView from './components/views/DashboardView';
-import DetectionView from './components/views/DetectionView';
-import AwarenessView from './components/views/AwarenessView';
-import HistoryView from './components/views/HistoryView';
-import ReportsView from './components/views/ReportsView';
-import SettingsView from './components/views/SettingsView';
-=======
 import React, { useState, useEffect, useCallback } from 'react';
 import Header from './components/common/Header';
 import HeroBanner from './components/HeroBanner';
@@ -20,14 +9,11 @@ import NetworkVisualizer from './components/NetworkVisualizer';
 import HistoryTable from './components/HistoryTable';
 import QuantumCanvas from './components/ui/QuantumCanvas';
 import { TextRollBasic } from './components/ui/demo';
->>>>>>> d7a6843 (Optimize ML adapter and update frontend features)
 import { analyzeUrl, getNetworkEvents, getHistory, getHealth } from './services/api';
 import { Radio, History, Sparkles, Terminal, Activity, Layers } from 'lucide-react';
 import { playClick } from './lib/soundFx';
 
 export default function App() {
-  const [activeView, setActiveView] = useState('dashboard'); // 'home' | 'dashboard' | 'detection' | 'awareness' | 'history' | 'reports' | 'settings'
-
   const [scanResult, setScanResult] = useState(null);
   const [loadingScan, setLoadingScan] = useState(false);
   const [scanError, setScanError] = useState(null);
@@ -40,12 +26,9 @@ export default function App() {
   const [loadingHistory, setLoadingHistory] = useState(false);
 
   const [connectionStatus, setConnectionStatus] = useState('Connecting'); // 'Connected' | 'Connecting' | 'Offline'
-<<<<<<< HEAD
-=======
   const [activeTab, setActiveTab] = useState('network'); // 'network' | 'history' | 'playground' | 'motion'
->>>>>>> d7a6843 (Optimize ML adapter and update frontend features)
 
-  // Backend Health Status Check
+  // Backend Health Check
   const checkHealth = useCallback(async () => {
     try {
       const isOk = await getHealth();
@@ -91,7 +74,7 @@ export default function App() {
     fetchHistory(false);
   };
 
-  // Initial Data Sync & Background Polling
+  // Initial Data Sync on Mount & 5-Second Network Polling
   useEffect(() => {
     let isMounted = true;
 
@@ -121,7 +104,7 @@ export default function App() {
     };
   }, [checkHealth, fetchNetworkEvents, fetchHistory]);
 
-  // Main URL Analysis Handler
+  // Main URL Threat Analysis Handler
   const handleAnalyze = async (url) => {
     setLoadingScan(true);
     setScanError(null);
@@ -130,47 +113,17 @@ export default function App() {
       const result = await analyzeUrl(url);
       setScanResult(result);
       setConnectionStatus('Connected');
-<<<<<<< HEAD
-      // Automatically refresh history to reflect new scan in queue
-=======
       // Immediately refresh scan history queue
->>>>>>> d7a6843 (Optimize ML adapter and update frontend features)
       fetchHistory(true);
-      // Switch view to Threat Inspector workspace
-      setActiveView('detection');
     } catch (err) {
       setScanError(err.message || 'Unable to perform URL threat analysis.');
       setScanResult(null);
-      setActiveView('detection');
     } finally {
       setLoadingScan(false);
     }
   };
 
-  // Select Item from History to re-scan
-  const handleSelectHistoryScan = (scan) => {
-    if (scan?.url) {
-      handleAnalyze(scan.url);
-    }
-  };
-
   return (
-<<<<<<< HEAD
-    <div className="min-h-screen bg-[#030712] text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-slate-950">
-      {/* NEXUS STYLE FROSTED NAVIGATION */}
-      <Navbar
-        activeView={activeView}
-        onViewChange={setActiveView}
-        connectionStatus={connectionStatus}
-        onRefreshAll={handleRefreshAll}
-      />
-
-      {/* ACTIVE VIEW CONTAINER */}
-      <main className="flex-1 max-w-[1400px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {activeView === 'home' && (
-          <HomeView onLaunchDetection={() => setActiveView('detection')} />
-        )}
-=======
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-slate-950 relative overflow-x-hidden">
       {/* Subtle Matrix Ambient Glow */}
       <div className="fixed top-0 left-1/4 w-96 h-96 bg-cyan-600/10 rounded-full blur-[140px] pointer-events-none" />
@@ -210,57 +163,13 @@ export default function App() {
             />
             <MicroTraining trainingData={scanResult?.micro_training} />
           </div>
->>>>>>> d7a6843 (Optimize ML adapter and update frontend features)
 
-        {activeView === 'dashboard' && (
-          <DashboardView
-            historyData={historyData}
-            networkData={networkData}
-            connectionStatus={connectionStatus}
-            onAnalyze={handleAnalyze}
-            isLoadingScan={loadingScan}
-            onRefreshNetwork={() => fetchNetworkEvents(false)}
-            isLoadingNetwork={loadingNetwork}
-            onSelectScan={handleSelectHistoryScan}
-            isLoadingHistory={loadingHistory}
-          />
-        )}
+          <div className="lg:col-span-6 space-y-6">
+            <ResultCard result={scanResult} isLoading={loadingScan} error={scanError} />
+            <QuantumComparison comparisonData={scanResult?.quantum_comparison} />
+          </div>
+        </section>
 
-<<<<<<< HEAD
-        {activeView === 'detection' && (
-          <DetectionView
-            scanResult={scanResult}
-            isLoadingScan={loadingScan}
-            scanError={scanError}
-            onAnalyze={handleAnalyze}
-          />
-        )}
-
-        {activeView === 'awareness' && (
-          <AwarenessView activeTrainingData={scanResult?.micro_training} />
-        )}
-
-        {activeView === 'history' && (
-          <HistoryView
-            historyData={historyData}
-            onSelectScan={handleSelectHistoryScan}
-            isLoadingHistory={loadingHistory}
-          />
-        )}
-
-        {activeView === 'reports' && (
-          <ReportsView historyData={historyData} scanResult={scanResult} />
-        )}
-
-        {activeView === 'settings' && (
-          <SettingsView connectionStatus={connectionStatus} />
-        )}
-      </main>
-
-      {/* FOOTER */}
-      <footer className="border-t border-slate-900 bg-slate-950 py-6 text-center text-xs text-slate-500">
-        SentinelAI — Quantum-Enhanced Phishing Detection & Network Threat Intelligence Platform
-=======
         {/* NETWORK THREAT INTELLIGENCE & AUDIT HISTORY TABBED PANELS */}
         <section className="space-y-4">
           <div className="flex flex-wrap border-b border-slate-800/80 gap-1 sm:gap-2">
@@ -359,7 +268,6 @@ export default function App() {
         <div className="text-[11px] text-slate-600">
           PennyLane Quantum Machine Learning • Scikit-Learn VQC Ansätze • Fast-Inference Defense Matrix
         </div>
->>>>>>> d7a6843 (Optimize ML adapter and update frontend features)
       </footer>
     </div>
   );

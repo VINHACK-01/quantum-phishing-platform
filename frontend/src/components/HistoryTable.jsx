@@ -38,22 +38,6 @@ export default function HistoryTable({ historyData, onSelectScan, isLoading }) {
   };
 
   return (
-<<<<<<< HEAD
-    <div className="nexus-card p-6 space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="p-1.5 bg-neutral-900 text-neutral-300 rounded-lg border border-neutral-800">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </span>
-          <div>
-            <h3 className="text-lg font-display text-white tracking-wide flex items-center gap-2">
-              Scan Audit History Log
-              <span className="text-xs font-mono font-normal text-neutral-400">({scans.length} Scans)</span>
-            </h3>
-            <p className="text-xs font-sans text-neutral-400">Recent FIFO analysis queue history</p>
-=======
     <div className="relative rounded-2xl border border-slate-800/80 bg-gradient-to-b from-slate-900/90 via-slate-950 to-slate-950 p-6 shadow-2xl space-y-4">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -69,7 +53,6 @@ export default function HistoryTable({ historyData, onSelectScan, isLoading }) {
               </Badge>
             </h3>
             <p className="text-xs text-slate-400">Chronological FIFO queue of previous quantum threat assessments</p>
->>>>>>> d7a6843 (Optimize ML adapter and update frontend features)
           </div>
         </div>
 
@@ -84,22 +67,6 @@ export default function HistoryTable({ historyData, onSelectScan, isLoading }) {
         </button>
       </div>
 
-<<<<<<< HEAD
-      <div className="overflow-x-auto rounded-xl border border-neutral-800 bg-[#050505]">
-        <table className="w-full text-left border-collapse text-xs">
-          <thead>
-            <tr className="bg-[#0c0c0c] border-b border-neutral-800 text-neutral-400 uppercase text-[10px] font-bold tracking-wider">
-              <th className="py-3 px-3.5">Scan ID</th>
-              <th className="py-3 px-3.5">Target Domain URL</th>
-              <th className="py-3 px-3.5">Risk Assessment</th>
-              <th className="py-3 px-3.5">Probability</th>
-              <th className="py-3 px-3.5">Timestamp</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-neutral-800/60 font-mono tracking-tight">
-            {scans.length > 0 ? (
-              scans.map((scan) => {
-=======
       {/* Search Filter */}
       <div className="relative max-w-sm">
         <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -128,7 +95,6 @@ export default function HistoryTable({ historyData, onSelectScan, isLoading }) {
           <tbody className="divide-y divide-slate-800/50 tracking-tight">
             {filteredScans.length > 0 ? (
               filteredScans.map((scan) => {
->>>>>>> d7a6843 (Optimize ML adapter and update frontend features)
                 const rawProb = typeof scan.phishing_probability === 'number' ? scan.phishing_probability : 0;
                 const probPercent = Math.round(rawProb * 100);
 
@@ -138,27 +104,6 @@ export default function HistoryTable({ historyData, onSelectScan, isLoading }) {
                 return (
                   <tr
                     key={scan.id || scan.timestamp}
-<<<<<<< HEAD
-                    onClick={() => onSelectScan && onSelectScan(scan)}
-                    className="hover:bg-neutral-900/80 transition-colors cursor-pointer group"
-                    title="Click to populate URL in scanner"
-                  >
-                    <td className="py-3 px-3.5 text-neutral-400 font-medium group-hover:text-red-400">
-                      {scan.id || 'scan-N/A'}
-                    </td>
-                    <td className="py-3 px-3.5 text-neutral-200 max-w-xs truncate" title={scan.url}>
-                      {scan.url}
-                    </td>
-                    <td className="py-3 px-3.5">
-                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${badgeClass}`}>
-                        {scan.risk_level || 'UNKNOWN'}
-                      </span>
-                    </td>
-                    <td className="py-3 px-3.5 font-bold text-white">
-                      {probPercent}%
-                    </td>
-                    <td className="py-3 px-3.5 text-neutral-400 text-[11px]">
-=======
                     onClick={() => {
                       playClick();
                       onSelectScan && onSelectScan(scan);
@@ -181,7 +126,6 @@ export default function HistoryTable({ historyData, onSelectScan, isLoading }) {
                       {probPercent}%
                     </td>
                     <td className="py-3 px-3.5 text-slate-400 text-[11px]">
->>>>>>> d7a6843 (Optimize ML adapter and update frontend features)
                       {scan.timestamp ? (
                         isNaN(new Date(scan.timestamp).getTime()) ? scan.timestamp : new Date(scan.timestamp).toLocaleTimeString()
                       ) : 'N/A'}
@@ -194,13 +138,8 @@ export default function HistoryTable({ historyData, onSelectScan, isLoading }) {
               })
             ) : (
               <tr>
-<<<<<<< HEAD
-                <td colSpan={5} className="py-8 text-center text-neutral-500 font-sans text-xs">
-                  {isLoading ? 'Loading scan history...' : 'No recent scans found in FIFO queue.'}
-=======
                 <td colSpan={6} className="py-8 text-center text-slate-500 font-mono text-xs">
                   {isLoading ? 'Retrieving audit history...' : 'No scan history matching the active query.'}
->>>>>>> d7a6843 (Optimize ML adapter and update frontend features)
                 </td>
               </tr>
             )}
