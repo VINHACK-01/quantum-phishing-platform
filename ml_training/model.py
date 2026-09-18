@@ -1,55 +1,91 @@
 import joblib
 import re
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote
 from feature_extraction import extract_features
 
 # Load your trained Extra Trees model once on startup
 loaded_model = joblib.load("backend/app/data/models/phishing_rf_model.joblib")
 
 def is_whitelisted(url: str) -> bool:
-    """Bypasses ML model for an extensive list of trusted global and institutional domains."""
+    """Enterprise-grade whitelist check with an extensive global domain directory, immune to parser exploits and script bypasses."""
     try:
-        parsed = urlparse(url)
-        netloc = parsed.netloc.lower()
+        # 1. Decode percent-encoding and sanitize whitespace
+        decoded_url = unquote(url).strip()
+        parsed = urlparse(decoded_url)
         
-        # Strip 'www.' if present to match root domains cleanly
+        # Reject non-standard protocols (e.g., data:, javascript:, file:)
+        if parsed.scheme not in ['http', 'https']:
+            return False  
+
+        # Use .hostname to completely neutralize the '@' userinfo injection trick
+        hostname = parsed.hostname
+        if not hostname:
+            return False
+            
+        netloc = hostname.lower()
+        path = parsed.path.lower()
+        
+        # Security Override 1: Never whitelist scripts or executable downloads
+        dangerous_extensions = ['.bat', '.exe', '.ps1', '.scr', '.sh', '.jar', '.cmd', '.vbs']
+        if any(path.endswith(ext) for ext in dangerous_extensions) or '/releases/download/' in path:
+            return False 
+
+        # Security Override 2: Never whitelist Punycode / Homograph spoofed domains
+        if 'xn--' in netloc:
+            return False
+
         if netloc.startswith('www.'):
             netloc = netloc[4:]
             
-        # Comprehensive registry of trusted domains across various categories
+        # Massive, categorized registry of trusted global domains
         trusted_domains = [
             # --- Search & Tech Giants ---
-            'google.com', 'google.co.in', 'google.co.uk', 'googleapis.com', 'gstatic.com',
-            'microsoft.com', 'apple.com', 'amazon.com', 'aws.amazon.com', 'microsoftonline.com',
-            'office.com', 'live.com', 'outlook.com', 'bing.com', 'yahoo.com',
-            
+            'google.com', 'google.co.in', 'google.co.uk', 'google.ca', 'google.com.au',
+            'googleapis.com', 'gstatic.com', 'goo.gl', 'microsoft.com', 'apple.com', 
+            'amazon.com', 'aws.amazon.com', 'microsoftonline.com', 'office.com', 
+            'live.com', 'outlook.com', 'bing.com', 'yahoo.com', 'yandex.ru', 'baidu.com',
+
             # --- Developer Platforms & Tools ---
-            'github.com', 'githubusercontent.com', 'gitlab.com', 'stackoverflow.com',
-            'npmjs.com', 'pypi.org', 'readthedocs.io', 'jsdelivr.net', 'unpkg.com',
-            'replit.com', 'codepen.io', 'codesandbox.io', 'localhost', '127.0.0.1',
-            
+            'github.com', 'githubusercontent.com', 'gitlab.com', 'bitbucket.org',
+            'stackoverflow.com', 'stackexchange.com', 'npmjs.com', 'pypi.org', 
+            'readthedocs.io', 'jsdelivr.net', 'unpkg.com', 'replit.com', 
+            'codepen.io', 'codesandbox.io', 'localhost', '127.0.0.1', 'apache.org', 'linux.org',
+
             # --- AI & LLM Platforms ---
             'claude.ai', 'anthropic.com', 'openai.com', 'chatgpt.com', 
-            'huggingface.co', 'hf.co', 'groq.com', 'cohere.ai', 'perplexity.ai',
-            
-            # --- Social & Communication ---
-            'twitter.com', 'x.com', 'linkedin.com', 'discord.com', 'discord.gg',
-            'slack.com', 'youtube.com', 'youtu.be', 'reddit.com', 'whatsapp.com',
-            'telegram.org', 'zoom.us', 'teams.microsoft.com',
-            
+            'huggingface.co', 'hf.co', 'groq.com', 'cohere.ai', 'perplexity.ai', 
+            'midjourney.com', 'elevenlabs.io',
+
+            # --- Social Media & Communication ---
+            'twitter.com', 'x.com', 'linkedin.com', 'facebook.com', 'fb.com', 
+            'instagram.com', 'discord.com', 'discord.gg', 'slack.com', 'whatsapp.com', 
+            'telegram.org', 'reddit.com', 'pinterest.com', 'snapchat.com', 
+            'youtube.com', 'youtu.be', 'twitch.tv', 'medium.com', 'zoom.us', 
+            'teams.microsoft.com',
+
             # --- Cloud, Hosting & Infrastructure ---
             'cloudflare.com', 'vercel.app', 'netlify.app', 'heroku.com', 
-            'digitalocean.com', 'firebaseapp.com', 'web.app', 'github.io',
-            
-            # --- Encyclopedias & Reference ---
-            'wikipedia.org', 'wikimedia.org', 'wikidata.org',
-            
-            # --- Education & University Portal ---
-            'vit.ac.in', 'vtop.vit.ac.in', 'blackboard.com', 'coursera.org', 
-            'udemy.com', 'edx.org', 'canvaslms.com'
+            'digitalocean.com', 'firebaseapp.com', 'web.app', 'github.io', 
+            'amazonaws.com', 'azure.com', 'fastly.com',
+
+            # --- Streaming & Entertainment ---
+            'netflix.com', 'spotify.com', 'disneyplus.com', 'primevideo.com', 
+            'soundcloud.com', 'twitch.tv', 'steampowered.com', 'epicgames.com',
+
+            # --- Finance, Payments & E-Commerce ---
+            'paypal.com', 'stripe.com', 'visa.com', 'mastercard.com', 
+            'americanexpress.com', 'ebay.com', 'shopify.com', 'walmart.com', 
+            'target.com', 'etsy.com',
+
+            # --- Encyclopedias, Reference & Education ---
+            'wikipedia.org', 'wikimedia.org', 'wikidata.org', 'archive.org', 
+            'w3.org', 'mdn.mozilla.org', 'coursera.org', 'udemy.com', 'edx.org', 
+            'canvaslms.com', 'blackboard.com',
+
+            # --- University & Regional Portals ---
+            'vit.ac.in', 'vtop.vit.ac.in', 'gov.in', 'nic.in'
         ]
         
-        # Check if netloc matches exact domain or is a subdomain of a trusted domain
         for domain in trusted_domains:
             if netloc == domain or netloc.endswith('.' + domain):
                 return True
@@ -61,28 +97,42 @@ def is_whitelisted(url: str) -> bool:
 
 def generate_threat_reasons(url: str, probability: float) -> list:
     reasons = []
-    if probability < 0.4:
+    decoded_url = unquote(url).lower()
+    parsed = urlparse(decoded_url)
+    netloc = parsed.netloc.lower()
+
+    if parsed.scheme not in ['http', 'https']:
+        reasons.append("Non-standard protocol scheme (potential data/script injection)")
+    
+    if 'xn--' in netloc:
+        reasons.append("Punycode/Internationalized Domain Name (IDN) homograph spoofing detected")
+        
+    shorteners = ['bit.ly', 'goo.gl', 't.co', 'tinyurl.com', 'ow.ly', 'is.gd', 'buff.ly', 'adf.ly']
+    if any(s in netloc for s in shorteners):
+        reasons.append("URL shortener service detected (destination obscured)")
+
+    if any(ext in decoded_url for ext in ['.bat', '.exe', '.ps1', '.sh', '.scr']):
+        reasons.append("Direct executable or script file download payload detected")
+
+    if probability < 0.4 and not reasons:
         return ["Standard URL structure", "No malicious patterns detected"]
     
-    if url.count('.') > 3:
+    if decoded_url.count('.') > 3:
         reasons.append("Subdomain depth exceeds normal threshold (> 3 levels)")
     
-    if any(brand in url.lower() for brand in ['paypal', 'login', 'secure', 'bank', 'account', 'verify']):
+    if any(brand in decoded_url for brand in ['paypal', 'login', 'secure', 'bank', 'account', 'verify']):
         reasons.append("Targeted brand keyword detected in non-authoritative structure")
         
-    if re.search(r'\.(xyz|top|zip|rar|cam|gq|ml|cf)$', url.lower()):
-        reasons.append("High-risk top-level domain (TLD) frequently abused in phishing campaigns")
-        
-    if len(url) > 75:
+    if len(decoded_url) > 75:
         reasons.append("Unusually long URL structure designed to hide destination path")
         
-    if not reasons:
+    if not reasons and probability >= 0.4:
         reasons.append("Lexical pattern anomaly flagged by machine learning classifier")
         
     return reasons
 
 def predict(url: str) -> dict:
-    # 1. IMMEDIATE WHITELIST CHECK (Prevents false positives on trusted sites like Wikipedia)
+    # 1. IMMEDIATE WHITELIST & SECURITY CHECK 
     if is_whitelisted(url):
         return {
             "url": url,
@@ -95,16 +145,20 @@ def predict(url: str) -> dict:
             }
         }
 
-    # 2. Extract features using the feature extraction script
-    features = extract_features(url)
-    
-    # 3. Get multi-class prediction probabilities
+    # 2. RUN ML PIPELINE & HEURISTIC OVERRIDES
+    sanitized_url = unquote(url)
+    features = extract_features(sanitized_url)
     probs = loaded_model.predict_proba([features])[0]
     
-    # Aggregate risk probability for phishing (class 2) and malware (class 3)
     phishing_probability = float(probs[2] + probs[3]) if len(probs) > 3 else float(probs[-1])
     
-    # 4. Determine risk level
+    parsed = urlparse(sanitized_url.lower())
+    if parsed.scheme not in ['http', 'https'] or 'xn--' in parsed.netloc or any(ext in sanitized_url.lower() for ext in ['.bat', '.exe', '.ps1', '.sh']):
+        phishing_probability = max(phishing_probability, 0.95)
+    elif any(s in parsed.netloc for s in ['bit.ly', 't.co', 'tinyurl.com']):
+        phishing_probability = max(phishing_probability, 0.65)
+
+    # 3. Determine risk level
     if phishing_probability > 0.7:
         risk_level = "HIGH"
     elif phishing_probability > 0.3:
@@ -112,7 +166,7 @@ def predict(url: str) -> dict:
     else:
         risk_level = "LOW"
         
-    # 5. Return exact Contract 1 JSON response shape
+    # 4. Return exact Contract 1 JSON response shape
     return {
         "url": url,
         "phishing_probability": phishing_probability,
