@@ -1,14 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
-import Header from './components/common/Header';
-import UrlScanner from './components/UrlScanner';
-import ResultCard from './components/ResultCard';
-import MicroTraining from './components/MicroTraining';
-import QuantumComparison from './components/QuantumComparison';
-import NetworkVisualizer from './components/NetworkVisualizer';
-import HistoryTable from './components/HistoryTable';
+import Navbar from './components/layout/Navbar';
+import HomeView from './components/views/HomeView';
+import DashboardView from './components/views/DashboardView';
+import DetectionView from './components/views/DetectionView';
+import AwarenessView from './components/views/AwarenessView';
+import HistoryView from './components/views/HistoryView';
+import ReportsView from './components/views/ReportsView';
+import SettingsView from './components/views/SettingsView';
 import { analyzeUrl, getNetworkEvents, getHistory, getHealth } from './services/api';
 
 export default function App() {
+  const [activeView, setActiveView] = useState('dashboard'); // 'home' | 'dashboard' | 'detection' | 'awareness' | 'history' | 'reports' | 'settings'
+
   const [scanResult, setScanResult] = useState(null);
   const [loadingScan, setLoadingScan] = useState(false);
   const [scanError, setScanError] = useState(null);
@@ -20,9 +23,8 @@ export default function App() {
   const [loadingHistory, setLoadingHistory] = useState(false);
 
   const [connectionStatus, setConnectionStatus] = useState('Connecting'); // 'Connected' | 'Connecting' | 'Offline'
-  const [activeTab, setActiveTab] = useState('network'); // 'network' | 'history'
 
-  // Backend Health Check
+  // Backend Health Status Check
   const checkHealth = useCallback(async () => {
     try {
       const isOk = await getHealth();
@@ -34,7 +36,7 @@ export default function App() {
     }
   }, []);
 
-  // Fetch Network Events (supports silent background polling to prevent UI flashing)
+  // Fetch Network Events (supports silent background polling)
   const fetchNetworkEvents = useCallback(async (isSilent = false) => {
     if (!isSilent) setLoadingNetwork(true);
     try {
@@ -68,16 +70,14 @@ export default function App() {
     fetchHistory(false);
   };
 
-  // Initial Data Sync on Mount & 5-Second Network Polling
+  // Initial Data Sync & Background Polling
   useEffect(() => {
     let isMounted = true;
 
-    // Initial load
     async function initDashboard() {
       const isHealthy = await checkHealth();
       if (isMounted) {
-        if (isHealthy) setConnectionStatus('Connected');
-        else setConnectionStatus('Offline');
+        setConnectionStatus(isHealthy ? 'Connected' : 'Offline');
       }
       fetchNetworkEvents(false);
       fetchHistory(false);
@@ -106,7 +106,7 @@ export default function App() {
     };
   }, [checkHealth, fetchNetworkEvents, fetchHistory]);
 
-  // Main URL Threat Analysis Handler
+  // Main URL Analysis Handler
   const handleAnalyze = async (url) => {
     setLoadingScan(true);
     setScanError(null);
@@ -114,82 +114,88 @@ export default function App() {
       const result = await analyzeUrl(url);
       setScanResult(result);
       setConnectionStatus('Connected');
-      // Immediately refresh scan history queue without full page reload
+      // Automatically refresh history to reflect new scan in queue
       fetchHistory(true);
+      // Switch view to Threat Inspector workspace
+      setActiveView('detection');
     } catch (err) {
       setScanError(err.message || 'Unable to perform URL threat analysis.');
       setScanResult(null);
+      setActiveView('detection');
     } finally {
       setLoadingScan(false);
     }
   };
 
+  // Select Item from History to re-scan
+  const handleSelectHistoryScan = (scan) => {
+    if (scan?.url) {
+      handleAnalyze(scan.url);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-slate-950">
-      {/* HEADER */}
-      <Header connectionStatus={connectionStatus} onRefreshAll={handleRefreshAll} />
+    <div className="min-h-screen bg-[#030712] text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-slate-950">
+      {/* NEXUS STYLE FROSTED NAVIGATION */}
+      <Navbar
+        activeView={activeView}
+        onViewChange={setActiveView}
+        connectionStatus={connectionStatus}
+        onRefreshAll={handleRefreshAll}
+      />
 
-      {/* DASHBOARD PAGE CONTAINER */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        
-        {/* URL THREAT ANALYSIS & ANALYSIS RESULTS */}
-        <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          <div className="lg:col-span-6 space-y-6">
-            <UrlScanner onAnalyze={handleAnalyze} isLoading={loadingScan} />
-            <MicroTraining trainingData={scanResult?.micro_training} />
-          </div>
+      {/* ACTIVE VIEW CONTAINER */}
+      <main className="flex-1 max-w-[1400px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {activeView === 'home' && (
+          <HomeView onLaunchDetection={() => setActiveView('detection')} />
+        )}
 
-          <div className="lg:col-span-6 space-y-6">
-            <ResultCard result={scanResult} isLoading={loadingScan} error={scanError} />
-            <QuantumComparison comparisonData={scanResult?.quantum_comparison} />
-          </div>
-        </section>
+        {activeView === 'dashboard' && (
+          <DashboardView
+            historyData={historyData}
+            networkData={networkData}
+            connectionStatus={connectionStatus}
+            onAnalyze={handleAnalyze}
+            isLoadingScan={loadingScan}
+            onRefreshNetwork={() => fetchNetworkEvents(false)}
+            isLoadingNetwork={loadingNetwork}
+            onSelectScan={handleSelectHistoryScan}
+            isLoadingHistory={loadingHistory}
+          />
+        )}
 
-        {/* NETWORK THREAT INTELLIGENCE & SCAN HISTORY TABBED PANELS */}
-        <section className="space-y-4">
-          <div className="flex border-b border-slate-900">
-            <button
-              onClick={() => setActiveTab('network')}
-              className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-all border-b-2 cursor-pointer ${
-                activeTab === 'network'
-                  ? 'border-cyan-500 text-cyan-400 bg-slate-900/60'
-                  : 'border-transparent text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              Network Threat Intelligence
-            </button>
-            <button
-              onClick={() => setActiveTab('history')}
-              className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-all border-b-2 cursor-pointer ${
-                activeTab === 'history'
-                  ? 'border-cyan-500 text-cyan-400 bg-slate-900/60'
-                  : 'border-transparent text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              Audit Scan History
-            </button>
-          </div>
+        {activeView === 'detection' && (
+          <DetectionView
+            scanResult={scanResult}
+            isLoadingScan={loadingScan}
+            scanError={scanError}
+            onAnalyze={handleAnalyze}
+          />
+        )}
 
-          <div>
-            {activeTab === 'network' ? (
-              <NetworkVisualizer
-                networkData={networkData}
-                onRefresh={() => fetchNetworkEvents(false)}
-                isLoading={loadingNetwork}
-              />
-            ) : (
-              <HistoryTable
-                historyData={historyData}
-                onSelectScan={(scan) => scan?.url && handleAnalyze(scan.url)}
-                isLoading={loadingHistory}
-              />
-            )}
-          </div>
-        </section>
+        {activeView === 'awareness' && (
+          <AwarenessView activeTrainingData={scanResult?.micro_training} />
+        )}
+
+        {activeView === 'history' && (
+          <HistoryView
+            historyData={historyData}
+            onSelectScan={handleSelectHistoryScan}
+            isLoadingHistory={loadingHistory}
+          />
+        )}
+
+        {activeView === 'reports' && (
+          <ReportsView historyData={historyData} scanResult={scanResult} />
+        )}
+
+        {activeView === 'settings' && (
+          <SettingsView connectionStatus={connectionStatus} />
+        )}
       </main>
 
       {/* FOOTER */}
-      <footer className="border-t border-slate-900 bg-slate-950 py-4 text-center text-xs text-slate-600">
+      <footer className="border-t border-slate-900 bg-slate-950 py-6 text-center text-xs text-slate-500">
         SentinelAI — Quantum-Enhanced Phishing Detection & Network Threat Intelligence Platform
       </footer>
     </div>

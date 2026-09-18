@@ -1,54 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:ital,wght@0,300..900;1,300..900&display=swap');
 @import "tailwindcss";
+
+@theme {
+  --font-display: 'Bebas Neue', sans-serif, system-ui;
+  --font-sans: 'Nunito', sans-serif, system-ui;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
 
 @layer base {
   :root {
-    /* Centralized Design System Tokens */
-    --bg-app: #090d16;
-    --bg-surface: #0f172a;
-    --bg-card: #1e293b;
-    --bg-card-hover: #26334d;
-    --border-color: #334155;
-    --border-highlight: #475569;
+    /* SentinelAI Black + White + Red Cybersecurity SOC Tokens */
+    --bg-obsidian: #050505;
+    --bg-surface-dark: #0a0a0a;
+    --bg-card: #121212;
+    --bg-card-hover: #181818;
+    --border-nexus: #262626;
+    --border-nexus-hover: #404040;
 
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
+    --text-primary: #ffffff;
+    --text-secondary: #a1a1aa;
+    --text-muted: #737373;
 
-    --accent-primary: #3b82f6;
-    --accent-cyan: #06b6d4;
-    --accent-quantum: #8b5cf6;
+    --accent-red: #ef4444;
+    --accent-red-hover: #dc2626;
+    --accent-dark-red: #991b1b;
 
-    --risk-low: #10b981;
-    --risk-low-bg: rgba(16, 185, 129, 0.15);
+    --risk-low: #a1a1aa;
+    --risk-low-bg: rgba(161, 161, 170, 0.1);
     --risk-medium: #f59e0b;
-    --risk-medium-bg: rgba(245, 158, 11, 0.15);
+    --risk-medium-bg: rgba(245, 158, 11, 0.12);
     --risk-high: #ef4444;
     --risk-high-bg: rgba(239, 68, 68, 0.15);
   }
 
   body {
-    background-color: var(--bg-app);
+    background-color: var(--bg-obsidian);
     color: var(--text-primary);
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-family: 'Nunito', sans-serif, system-ui;
     min-height: 100vh;
     margin: 0;
     padding: 0;
     overflow-x: hidden;
   }
+
+  h1, h2, h3, .font-display {
+    font-family: 'Bebas Neue', sans-serif, system-ui;
+    letter-spacing: 0.04em;
+  }
+
+  .font-sans {
+    font-family: 'Nunito', sans-serif, system-ui;
+  }
+
+  .font-mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  }
 }
 
-/* Reusable Utility Tokens */
-.glass-panel {
-  background-color: rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--border-color);
+/* SentinelAI Solid Charcoal Card & Panel System */
+.nexus-card {
+  background: #0f0f0f;
+  border: 1px solid var(--border-nexus);
   border-radius: 0.75rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.7), 0 4px 6px -4px rgba(0, 0, 0, 0.7);
+  transition: all 0.2s ease-in-out;
+}
+
+.nexus-card:hover {
+  border-color: var(--border-nexus-hover);
+}
+
+.nexus-hero-glow {
+  background: radial-gradient(circle at 50% 0%, rgba(239, 68, 68, 0.08) 0%, rgba(153, 27, 27, 0.04) 40%, rgba(5, 5, 5, 0) 70%);
 }
 
 .risk-badge-low {
   background-color: var(--risk-low-bg);
-  color: var(--risk-low);
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #e5e5e5;
+  border: 1px solid rgba(161, 161, 170, 0.3);
 }
 
 .risk-badge-medium {
@@ -60,21 +89,21 @@
 .risk-badge-high {
   background-color: var(--risk-high-bg);
   color: var(--risk-high);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  border: 1px solid rgba(239, 68, 68, 0.4);
 }
 
-/* Custom Scrollbars */
+/* Custom Monospaced Technical Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--bg-app);
+  background: var(--bg-obsidian);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border-color);
+  background: #262626;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--border-highlight);
+  background: #404040;
 }

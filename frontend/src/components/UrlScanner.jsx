@@ -41,7 +41,6 @@ export default function UrlScanner({ onAnalyze, isLoading }) {
   };
 
   const handleSelectPreset = (url) => {
-    // Populate input field only, do NOT auto-trigger analysis per project rules
     setInputUrl(url);
     setValidationError('');
   };
@@ -52,22 +51,22 @@ export default function UrlScanner({ onAnalyze, isLoading }) {
   };
 
   return (
-    <div className="glass-panel p-6 shadow-xl border border-slate-800">
-      <div className="flex items-center justify-between mb-4">
+    <div className="nexus-card p-6 space-y-4">
+      <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-slate-100 flex items-center gap-2">
-            <svg className="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <h2 className="text-2xl font-display text-white tracking-wide flex items-center gap-2">
+            <svg className="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            URL Threat Inspection
+            URL Threat Inspector
           </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs font-sans text-neutral-400 mt-0.5">
             Analyze domain structure, lexical entropy, and brand spoofing indicators.
           </p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="mb-3">
+      <form onSubmit={handleSubmit} className="space-y-3">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <input
@@ -76,13 +75,12 @@ export default function UrlScanner({ onAnalyze, isLoading }) {
               onChange={handleInputChange}
               placeholder="Enter URL (e.g., https://secure-login-paypal.com.account-verify.xyz/auth)"
               disabled={isLoading}
-              className={`w-full px-4 py-3 pr-16 bg-slate-950 border ${
-                validationError ? 'border-red-500/80 focus:border-red-500' : 'border-slate-800 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50'
-              } rounded-lg text-slate-100 text-sm placeholder-slate-500 focus:outline-none transition-all font-mono`}
+              className={`w-full px-4 py-3.5 pr-16 bg-[#050505] border ${
+                validationError ? 'border-red-500/80 focus:border-red-500' : 'border-neutral-800 focus:border-red-500 focus:ring-1 focus:ring-red-500/50'
+              } rounded-xl text-white text-xs placeholder-neutral-500 focus:outline-none transition-all font-mono`}
             />
-            {/* Keyboard Hint Pill */}
             {!inputUrl && (
-              <span className="hidden md:inline-block absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-900 text-slate-500 border border-slate-800 pointer-events-none">
+              <span className="hidden md:inline-block absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono px-2 py-0.5 rounded bg-neutral-900 text-neutral-500 border border-neutral-800 pointer-events-none">
                 Enter ↵
               </span>
             )}
@@ -93,20 +91,21 @@ export default function UrlScanner({ onAnalyze, isLoading }) {
                   setInputUrl('');
                   setValidationError('');
                 }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 text-xs font-sans"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-300 text-xs font-sans"
               >
                 Clear
               </button>
             )}
           </div>
+
           <button
             type="submit"
             disabled={!inputUrl.trim() || isLoading}
-            className="px-6 py-3 bg-cyan-600 hover:bg-cyan-500 disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg shadow border border-cyan-500/30 flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0"
+            className="px-6 py-3.5 bg-red-600 hover:bg-red-500 disabled:bg-neutral-900 disabled:text-neutral-600 disabled:border-neutral-800 disabled:cursor-not-allowed text-white text-xs font-black rounded-xl shadow-lg shadow-red-950/40 flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0 border border-red-500/30"
           >
             {isLoading ? (
               <>
-                <svg className="animate-spin w-4 h-4 text-cyan-200" fill="none" viewBox="0 0 24 24">
+                <svg className="animate-spin w-4 h-4 text-red-200" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
@@ -122,8 +121,9 @@ export default function UrlScanner({ onAnalyze, isLoading }) {
             )}
           </button>
         </div>
+
         {validationError && (
-          <p className="text-xs text-red-400 mt-2 flex items-center gap-1 font-sans">
+          <p className="text-xs text-red-400 flex items-center gap-1 font-sans">
             <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01" />
             </svg>
@@ -132,16 +132,16 @@ export default function UrlScanner({ onAnalyze, isLoading }) {
         )}
       </form>
 
-      {/* Preset Sample Selector (Populates Input Only) */}
-      <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-slate-800/80">
-        <span className="text-[11px] text-slate-500 font-medium">Sample Test Targets:</span>
+      {/* Preset Target Selector */}
+      <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-neutral-800/80">
+        <span className="text-[11px] text-neutral-500 font-bold uppercase tracking-wider">Presets:</span>
         {SAMPLE_PRESETS.map((preset, idx) => (
           <button
             key={idx}
             type="button"
             onClick={() => handleSelectPreset(preset.url)}
             disabled={isLoading}
-            className="px-2.5 py-1 text-xs rounded-md bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 hover:border-slate-700 transition-colors cursor-pointer"
+            className="px-3 py-1 text-xs rounded-full bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white border border-neutral-800 hover:border-neutral-700 transition-colors cursor-pointer font-medium"
           >
             {preset.label}
           </button>
