@@ -1,65 +1,121 @@
-export default function Header({ connectionStatus, onRefreshAll }) {
-  // connectionStatus can be: 'Connected' | 'Connecting' | 'Offline'
-  const status = connectionStatus || 'Connecting';
+import React, { useState } from 'react';
+import { TextRoll } from '@/components/ui/text-roll';
+import { Volume2, VolumeX, RefreshCw, Shield, Cpu, Wifi, Radio } from 'lucide-react';
+import { toggleSound, isSoundEnabled, playClick } from '@/lib/soundFx';
 
-  let statusDotColor = 'bg-amber-400 animate-pulse';
-  let statusTextColor = 'text-amber-400';
+export default function Header({ connectionStatus, onRefreshAll }) {
+  const [soundOn, setSoundOn] = useState(isSoundEnabled());
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const status = connectionStatus || 'Connecting';
+  let statusDot = 'bg-amber-400 animate-pulse';
   let statusText = 'Connecting...';
+  let statusTextColor = 'text-amber-400';
 
   if (status === 'Connected') {
-    statusDotColor = 'bg-emerald-400';
+    statusDot = 'bg-emerald-400 shadow-[0_0_8px_#10b981]';
+    statusText = 'DEFENSE GRID ONLINE';
     statusTextColor = 'text-emerald-400';
-    statusText = 'Connected';
   } else if (status === 'Offline') {
-    statusDotColor = 'bg-slate-500';
-    statusTextColor = 'text-slate-400';
-    statusText = 'Offline (Fallback)';
+    statusDot = 'bg-rose-500';
+    statusText = 'OFFLINE (STANDALONE)';
+    statusTextColor = 'text-rose-400';
   }
 
+  const handleSoundToggle = () => {
+    const newState = toggleSound();
+    setSoundOn(newState);
+    if (newState) playClick();
+  };
+
+  const handleRefresh = async () => {
+    playClick();
+    setIsRefreshing(true);
+    if (onRefreshAll) onRefreshAll();
+    setTimeout(() => setIsRefreshing(false), 800);
+  };
+
   return (
-    <header className="border-b border-slate-900 bg-slate-950/90 backdrop-blur-md sticky top-0 z-50">
+    <header className="border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-xl sticky top-0 z-50 shadow-lg shadow-black/40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
-        {/* Brand & Subtitle */}
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-slate-900 border border-slate-800 p-0.5 shadow-md flex items-center justify-center shrink-0">
-            <svg className="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-            </svg>
+        {/* Brand & Logo with Quantum Glow */}
+        <div className="flex items-center gap-3.5">
+          <div className="relative group">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-600 via-indigo-600 to-purple-600 p-[1.5px] shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-transform group-hover:scale-105">
+              <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
+                <Shield className="w-5 h-5 text-cyan-400 animate-pulse" />
+              </div>
+            </div>
+            {/* Pulsing Qubit Dot */}
+            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-purple-500 border-2 border-slate-950 rounded-full animate-ping" />
           </div>
 
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-base font-extrabold tracking-tight text-white">
-                Sentinel<span className="text-cyan-400">AI</span>
-              </h1>
-              <span className="text-[10px] px-1.5 py-0.2 rounded font-mono font-medium bg-slate-900 text-slate-300 border border-slate-800">
-                v1.0
+              <div className="text-lg font-black tracking-tight text-white flex items-center gap-1.5 font-sans">
+                <TextRoll duration={0.4} className="text-white">
+                  SENTINEL
+                </TextRoll>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">
+                  AI
+                </span>
+              </div>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-950/80 text-cyan-300 border border-cyan-800/80 font-bold uppercase tracking-wider">
+                QUANTUM VQC v2.4
               </span>
             </div>
-            <p className="text-xs text-slate-400">
-              Quantum-Enhanced Phishing Detection & Real-Time Network Threat Intelligence
+            <p className="text-[11px] font-mono text-slate-400 flex items-center gap-1.5">
+              <Cpu className="w-3 h-3 text-purple-400" />
+              <span>PennyLane Quantum State Vector Engine & PCAP Telemetry</span>
             </p>
           </div>
         </div>
 
-        {/* System Connection Indicator & Refresh */}
-        <div className="flex items-center gap-3">
-          {/* Compact Connection Indicator */}
-          <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-slate-900 border border-slate-800/80 text-xs">
-            <span className={`w-2 h-2 rounded-full ${statusDotColor}`}></span>
-            <span className="text-slate-400 text-[11px] font-mono">
-              Backend: <strong className={statusTextColor}>{statusText}</strong>
-            </span>
+        {/* Right HUD Controls: Audio Synthesizer, Status, and Sync */}
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          {/* Sound FX Synthesizer Button */}
+          <button
+            onClick={handleSoundToggle}
+            className={`px-2.5 py-1.5 rounded-lg border text-xs font-mono transition-all flex items-center gap-2 cursor-pointer ${
+              soundOn
+                ? 'bg-cyan-950/60 border-cyan-500/50 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.2)]'
+                : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-400'
+            }`}
+            title={soundOn ? 'Futuristic Cyber Sound Effects: ON' : 'Sound Effects: MUTED'}
+          >
+            {soundOn ? (
+              <>
+                <Volume2 className="w-4 h-4 text-cyan-400" />
+                <span className="hidden md:inline-flex items-center gap-0.5">
+                  <span className="w-1 h-2.5 bg-cyan-400 animate-pulse rounded-full" />
+                  <span className="w-1 h-4 bg-cyan-400 animate-pulse rounded-full delay-75" />
+                  <span className="w-1 h-1.5 bg-cyan-400 animate-pulse rounded-full delay-150" />
+                </span>
+                <span className="hidden sm:inline">SFX ON</span>
+              </>
+            ) : (
+              <>
+                <VolumeX className="w-4 h-4" />
+                <span className="hidden sm:inline">MUTED</span>
+              </>
+            )}
+          </button>
+
+          {/* Real-Time Grid Status Badge */}
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900/90 border border-slate-800/90 text-xs font-mono">
+            <span className={`w-2 h-2 rounded-full ${statusDot}`} />
+            <span className="text-slate-400 hidden lg:inline">Status:</span>
+            <span className={`font-bold ${statusTextColor}`}>{statusText}</span>
           </div>
 
+          {/* Sync All Feeds Button */}
           <button
-            onClick={onRefreshAll}
-            className="p-1.5 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white rounded-lg border border-slate-800 transition-colors cursor-pointer"
-            title="Refresh System Feeds"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 hover:border-cyan-500/50 transition-all cursor-pointer shadow active:scale-95 disabled:opacity-50"
+            title="Synchronize All Feeds & Quantum States"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
+            <RefreshCw className={`w-4 h-4 text-cyan-400 ${isRefreshing ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>

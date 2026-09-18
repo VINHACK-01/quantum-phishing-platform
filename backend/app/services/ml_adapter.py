@@ -112,6 +112,8 @@ class MockPredictor(Predictor):
         counts = [text.count(c) / len(text) for c in set(text)]
         return -sum(p * math.log2(p) for p in counts)
 
+    _IP_REGEX = re.compile(r"\d{1,3}(\.\d{1,3}){3}")
+
     @staticmethod
     def _extract_features(url: str) -> dict:
         canonical = url if url.startswith(("http://", "https://")) else "http://" + url
@@ -120,7 +122,7 @@ class MockPredictor(Predictor):
         host = netloc.split(":")[0]
         full = url.lower()
 
-        is_ip = bool(re.fullmatch(r"\d{1,3}(\.\d{1,3}){3}", host))
+        is_ip = bool(MockPredictor._IP_REGEX.fullmatch(host))
         host_parts = host.split(".")
         subdomain_count = max(0, len(host_parts) - 2) if not is_ip else 0
 
@@ -258,32 +260,23 @@ class ProductionPredictor(Predictor):
             return self._mock_fallback.predict(url)
 
         try:
-            features = MockPredictor._extract_features(url)
-            # Build a feature vector matching what A's pipeline expects.
-            # Person A: update this list to match your training feature order.
-            feature_vector = [[
-                features["length"],
-                features["entropy"],
-                features["dot_count"],
-                int(features["at_symbol"]),
-                int(features["is_ip"]),
-                features["subdomain_count"],
-                len(features["detected_keywords"]),
-                int(features["brand_in_subdomain"]),
-                int(features["has_suspicious_tld"]),
-                int(features["uses_https"]),
-            ]]
+            from app.services.feature_extraction import extract_features
+            features = extract_features(url)
 
-            proba = self._pipeline.predict_proba(feature_vector)[0]
-            # Assume index 1 is the phishing class probability
-            probability = round(float(proba[1]), 3)
+            probs = self._pipeline.predict_proba([features])[0]
+            
+            # Aggregate risk probability for phishing (class 2) and malware (class 3)
+            phishing_probability = float(probs[2] + probs[3]) if len(probs) > 3 else float(probs[-1])
+            probability = round(phishing_probability, 3)
+
             risk_level = classify_risk(probability)
 
-            # Reasons from trained model — use top feature importances if pipeline
-            # exposes them, else provide a generic explanation.
-            reasons = [
-                f"Trained Random Forest classifier assigned phishing probability of {probability}"
-            ]
+            # Reasons from trained model based on ml_training logic
+            reasons = []
+            if probability < 0.4:
+                reasons = ["Standard URL structure", "No malicious patterns detected"]
+            else:
+                reasons = ["Machine learning classifier flagged this URL based on structural and lexical features"]
 
             return probability, risk_level, reasons
 
