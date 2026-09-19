@@ -135,7 +135,7 @@ export default function App() {
       {/* DASHBOARD PAGE CONTAINER */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-7 relative z-10">
         {/* HERO BANNER WITH TEXT-ROLL & TELEMETRY KPIS */}
-        <HeroBanner onSelectPreset={handleAnalyze} />
+        <HeroBanner onSelectPreset={handleAnalyze} networkData={networkData} />
 
         {/* BRUNO SIMON INTERACTIVE 3D QUANTUM CANVAS */}
         <section className="space-y-2">
@@ -143,7 +143,7 @@ export default function App() {
             <div className="flex items-center gap-2 text-xs font-mono text-cyan-400">
               <Sparkles className="w-4 h-4 text-cyan-400 animate-spin" />
               <span className="font-bold uppercase tracking-wider">
-                Quantum Superposition Physics Simulator (Bruno Simon Mode)
+                Interactive Threat Lattice
               </span>
             </div>
             <span className="text-[11px] font-mono text-slate-500 hidden sm:inline">

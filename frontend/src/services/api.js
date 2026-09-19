@@ -97,3 +97,14 @@ export async function getHealth() {
     return false;
   }
 }
+
+/**
+ * Fetches quantum benchmark statistics.
+ * GET /api/quantum-stats
+ * @returns {Promise<Object>} Quantum stats payload
+ */
+export async function getQuantumStats() {
+  return await fetchJson('/api/quantum-stats', {
+    method: 'GET',
+  });
+}

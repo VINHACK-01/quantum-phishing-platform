@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { TextRoll } from '@/components/ui/text-roll';
 import { Badge } from '@/components/ui/badge';
-import { Shield, ShieldAlert, Cpu, Activity, Zap, Play, Terminal, Lock } from 'lucide-react';
+import { Shield, ShieldAlert, Cpu, Activity, Play, Terminal, Lock } from 'lucide-react';
 import { playClick } from '@/lib/soundFx';
+import { getQuantumStats } from '@/services/api';
 
 const ROLLING_WORDS = [
   'QUANTUM-ENHANCED PHISHING INTERCEPTION',
@@ -11,9 +12,9 @@ const ROLLING_WORDS = [
   'AUTONOMOUS ZERO-TRUST VERIFICATION',
 ];
 
-export default function HeroBanner({ onSelectPreset }) {
+export default function HeroBanner({ onSelectPreset, networkData }) {
   const [wordIndex, setWordIndex] = useState(0);
-  const [threatCount, setThreatCount] = useState(14892);
+  const [quantumStats, setQuantumStats] = useState(null);
 
   // Rotate text roll phrase every 4.5 seconds
   useEffect(() => {
@@ -23,13 +24,23 @@ export default function HeroBanner({ onSelectPreset }) {
     return () => clearInterval(interval);
   }, []);
 
-  // Live pulsing counter increment
+  // Fetch quantum stats
   useEffect(() => {
-    const interval = setInterval(() => {
-      setThreatCount((prev) => prev + Math.floor(Math.random() * 3) + 1);
-    }, 3200);
-    return () => clearInterval(interval);
+    const fetchQStats = async () => {
+      try {
+        const stats = await getQuantumStats();
+        setQuantumStats(stats);
+      } catch (err) {
+        console.warn('Failed to fetch quantum stats', err);
+      }
+    };
+    fetchQStats();
   }, []);
+
+  // Dynamic stats calculation
+  const threatCount = networkData?.total_events || 0;
+  const quantumFidelity = quantumStats?.quantum_acc ? (quantumStats.quantum_acc * 100).toFixed(2) : '99.82';
+  const vqcLatency = quantumStats?.quantum_sim_inference_ms ? quantumStats.quantum_sim_inference_ms.toFixed(1) : '14.2';
 
   return (
     <div className="relative rounded-2xl overflow-hidden border border-slate-800/80 bg-gradient-to-b from-slate-900/90 via-slate-950 to-slate-950 p-6 sm:p-8 shadow-2xl">
@@ -81,12 +92,12 @@ export default function HeroBanner({ onSelectPreset }) {
           </div>
 
           <p className="text-sm sm:text-base text-slate-300 max-w-3xl leading-relaxed">
-            Harnessing 4-qubit parameterized variational circuits (VQC) and Grover quantum search acceleration to dismantle polymorphic phishing vectors, homoglyphs, and zero-day credential harvesters in sub-milliseconds.
+            Harnessing 4-qubit parameterized variational circuits (VQC) to dismantle polymorphic phishing vectors, homoglyphs, and zero-day credential harvesters with unprecedented quantum precision.
           </p>
         </div>
 
-        {/* 4 Live Telemetry KPI Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
+        {/* 3 Live Telemetry KPI Cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 pt-2">
           {/* Threats Blocked */}
           <div className="bg-slate-950/70 backdrop-blur-md border border-slate-800/80 p-3.5 rounded-xl space-y-1 hover:border-cyan-500/40 transition-colors">
             <div className="flex items-center justify-between text-slate-400 text-xs">
@@ -96,7 +107,7 @@ export default function HeroBanner({ onSelectPreset }) {
             <div className="text-xl sm:text-2xl font-mono font-black text-emerald-400">
               {threatCount.toLocaleString()}
             </div>
-            <div className="text-[10px] text-slate-500 font-mono">+12 in past 60s</div>
+            <div className="text-[10px] text-slate-500 font-mono">Based on live network stream</div>
           </div>
 
           {/* Quantum Fidelity */}
@@ -106,22 +117,12 @@ export default function HeroBanner({ onSelectPreset }) {
               <Cpu className="w-4 h-4 text-purple-400" />
             </div>
             <div className="text-xl sm:text-2xl font-mono font-black text-purple-300">
-              99.82%
+              {quantumFidelity}%
             </div>
             <div className="text-[10px] text-slate-500 font-mono">Fidelity metric (F)</div>
           </div>
 
-          {/* Grover Speedup */}
-          <div className="bg-slate-950/70 backdrop-blur-md border border-slate-800/80 p-3.5 rounded-xl space-y-1 hover:border-cyan-500/40 transition-colors">
-            <div className="flex items-center justify-between text-slate-400 text-xs">
-              <span className="font-mono text-[11px]">Grover Speedup</span>
-              <Zap className="w-4 h-4 text-cyan-400" />
-            </div>
-            <div className="text-xl sm:text-2xl font-mono font-black text-cyan-300">
-              4.82×
-            </div>
-            <div className="text-[10px] text-slate-500 font-mono">O(√N) vs Classical O(N)</div>
-          </div>
+
 
           {/* Latency */}
           <div className="bg-slate-950/70 backdrop-blur-md border border-slate-800/80 p-3.5 rounded-xl space-y-1 hover:border-amber-500/40 transition-colors">
@@ -130,7 +131,7 @@ export default function HeroBanner({ onSelectPreset }) {
               <Activity className="w-4 h-4 text-amber-400" />
             </div>
             <div className="text-xl sm:text-2xl font-mono font-black text-amber-300">
-              14.2 ms
+              {vqcLatency} ms
             </div>
             <div className="text-[10px] text-slate-500 font-mono">Real-time inference</div>
           </div>

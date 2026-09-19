@@ -115,7 +115,7 @@ class PhishingAnalysisService:
 
         # --- Phase 3: Machine Learning & Heuristic Threat Rules ---
         try:
-            probability, risk_level, reasons = _cached_ml_predict(url)
+            probability, risk_level, reasons = ml_engine.predict(url)
         except Exception as exc:
             logger.exception(f"ML inference failure for URL '{url}': {exc}")
             raise MLServiceUnavailableError(f"ML analysis service error: {exc}")

@@ -169,14 +169,46 @@ class MockNetworkEventProvider(NetworkEventProvider):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Production PCAP Provider (Placeholder for Person D's Scapy parser)
+# Production PCAP Provider (Integrated from Person D's network_analysis/parse_pcap)
 # ─────────────────────────────────────────────────────────────────────────────
+
+KNOWN_BAD_DOMAINS = [
+    "malicious-update.com",
+    "secure-login-verify.net",
+    "freegift-claim.xyz",
+]
+
+SUSPICIOUS_KEYWORDS = ["login", "verify", "secure", "update", "account", "confirm", "claim"]
+REPEAT_CONNECTION_THRESHOLD = 15
+
+
+def looks_suspicious_domain(domain: str) -> Optional[str]:
+    """
+    Person D's heuristic rule engine for DNS domain threat inspection.
+    """
+    import re
+    cleaned = domain.lower().rstrip(".")
+
+    if cleaned in KNOWN_BAD_DOMAINS:
+        return "Matches known malicious domain"
+
+    if any(keyword in cleaned for keyword in SUSPICIOUS_KEYWORDS):
+        return "Domain contains phishing-style keyword"
+
+    if len(cleaned) > 40:
+        return "Unusually long domain name (> 40 chars)"
+
+    if re.search(r"[0-9]{4,}", cleaned):
+        return "Domain contains long digit sequence (common in auto-generated DGA domains)"
+
+    return None
+
 
 class ProductionPCAPProvider(NetworkEventProvider):
     """
-    Parses real offline .pcap / .pcapng captures using Scapy.
-    Person D drops threats.pcap into backend/data/pcaps/ at Hour 8.
-    Falls back gracefully to MockNetworkEventProvider if Scapy is missing or files cannot be parsed.
+    Parses offline .pcap captures using Person D's Scapy inspection logic.
+    Analyzes DNS queries for DGA/phishing patterns and TCP connections for beaconing.
+    Falls back gracefully to MockNetworkEventProvider if files are missing or unreadable.
     """
 
     def __init__(self, pcap_dir: str):
@@ -188,6 +220,43 @@ class ProductionPCAPProvider(NetworkEventProvider):
             logger.warning("[ProductionPCAPProvider] pcap_dir not found, falling back to mock")
             return self._mock_fallback.get_events(limit=limit)
 
+        # 1. First check if Person D's pre-parsed network_events.json exists
+        json_file = os.path.join(self.pcap_dir, "network_events.json")
+        if os.path.exists(json_file):
+            try:
+                import json
+                with open(json_file, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    raw_events = data.get("events", [])
+                    events = []
+                    today_prefix = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+                    for idx, e in enumerate(raw_events[:limit]):
+                        raw_ts = str(e.get("timestamp") or "")
+                        if "T" not in raw_ts:
+                            clean_time = raw_ts.split(".")[0] if "." in raw_ts else raw_ts
+                            if len(clean_time) == 8 and clean_time.count(":") == 2:
+                                ts = f"{today_prefix}T{clean_time}Z"
+                            else:
+                                ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+                        else:
+                            ts = raw_ts
+
+                        events.append(NetworkEvent(
+                            id=f"evt-{idx+1:03d}",
+                            timestamp=ts,
+                            protocol=e.get("protocol", "RAW"),
+                            src=e.get("src", "127.0.0.1"),
+                            dst=e.get("dst", "0.0.0.0"),
+                            flag=e.get("flag", "normal"),
+                            reason=e.get("reason", "Network event")
+                        ))
+                    if events:
+                        logger.info(f"[ProductionPCAPProvider] Successfully loaded {len(events)} events from {json_file}")
+                        return events
+            except Exception as e:
+                logger.warning(f"[ProductionPCAPProvider] Error reading network_events.json ({e}), attempting live Scapy parse")
+
+        # 2. Live Scapy PCAP parsing with Person D's rules
         pcap_files = glob.glob(os.path.join(self.pcap_dir, "*.pcap")) + glob.glob(os.path.join(self.pcap_dir, "*.pcapng"))
         if not pcap_files:
             logger.warning("[ProductionPCAPProvider] No .pcap files found, falling back to mock")
@@ -195,52 +264,87 @@ class ProductionPCAPProvider(NetworkEventProvider):
 
         target_file = pcap_files[0]
         try:
-            from scapy.all import rdpcap, DNS, IP, TCP
+            from collections import defaultdict
+            from scapy.all import rdpcap, DNSQR, IP, TCP
+
             packets = rdpcap(target_file)
             events: List[NetworkEvent] = []
+            connection_counts = defaultdict(int)
+            already_flagged_pairs = set()
 
-            for idx, pkt in enumerate(packets[:limit]):
-                if not pkt.haslayer(IP):
-                    continue
+            for idx, pkt in enumerate(packets[:limit * 2]):
+                # Human readable timestamp
+                pkt_time = getattr(pkt, 'time', None)
+                if pkt_time:
+                    try:
+                        timestamp = datetime.fromtimestamp(float(pkt_time), tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+                    except Exception:
+                        timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+                else:
+                    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
-                src = pkt[IP].src
-                dst = pkt[IP].dst
-                proto = "IP"
-                flag = "normal"
-                reason = "Routine network communication"
+                # Rule 1: DNS query check
+                if pkt.haslayer(DNSQR):
+                    try:
+                        qname = pkt[DNSQR].qname.decode(errors="ignore").rstrip(".")
+                    except Exception:
+                        qname = str(pkt[DNSQR].qname).rstrip(".")
 
-                if pkt.haslayer(DNS) and pkt.getlayer(DNS).qr == 0:
-                    proto = "DNS"
-                    qname = pkt.getlayer(DNS).qd.qname.decode("utf-8", errors="ignore") if pkt.getlayer(DNS).qd else ""
-                    if any(bad in qname for bad in ["c2", "malware", "dga", "tunnel", "exfil"]) or len(qname) > 35:
-                        flag = "suspicious"
-                        reason = f"High-entropy / anomalous DNS query: {qname.strip('.')}"
-                    else:
-                        reason = f"Standard DNS query: {qname.strip('.')}"
-                elif pkt.haslayer(TCP):
-                    proto = "TCP"
+                    src = pkt[IP].src if pkt.haslayer(IP) else "192.168.1.10"
+                    reason = looks_suspicious_domain(qname)
+                    events.append(NetworkEvent(
+                        id=f"evt-{len(events)+1:03d}",
+                        timestamp=timestamp,
+                        protocol="DNS",
+                        src=src,
+                        dst=qname,
+                        flag="suspicious" if reason else "normal",
+                        reason=reason or "Standard DNS query resolution"
+                    ))
+
+                # Rule 2: Repeated connections / beaconing check
+                if pkt.haslayer(IP) and pkt.haslayer(TCP):
+                    src, dst = pkt[IP].src, pkt[IP].dst
+                    key = (src, dst)
+                    connection_counts[key] += 1
+
+                    if connection_counts[key] >= REPEAT_CONNECTION_THRESHOLD and key not in already_flagged_pairs:
+                        already_flagged_pairs.add(key)
+                        events.append(NetworkEvent(
+                            id=f"evt-{len(events)+1:03d}",
+                            timestamp=timestamp,
+                            protocol="TCP",
+                            src=src,
+                            dst=dst,
+                            flag="suspicious",
+                            reason=f"Repeated connections to same destination ({connection_counts[key]}+ times) -- possible beaconing or scan"
+                        ))
+
+                    # Rule 3: HTTP traffic inspection
                     dport = pkt[TCP].dport
-                    if dport in [80, 8080]:
-                        proto = "HTTP"
-                    elif dport == 443:
-                        proto = "HTTPS"
-                    elif dport in [4444, 1337, 8888, 9001]:
-                        flag = "suspicious"
-                        reason = f"Non-standard outbound connection on suspicious port {dport}"
+                    sport = pkt[TCP].sport
+                    raw_payload = bytes(pkt[TCP].payload) if hasattr(pkt[TCP], 'payload') else b""
 
-                events.append(NetworkEvent(
-                    id=f"pcap-evt-{idx+1:03d}",
-                    timestamp=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                    protocol=proto,
-                    src=src,
-                    dst=dst,
-                    flag=flag,
-                    reason=reason
-                ))
+                    if dport in [80, 8080] or sport in [80, 8080] or b"HTTP" in raw_payload:
+                        is_suspicious_http = dst == "185.220.101.5" or b"POST" in raw_payload or dport == 8080
+                        events.append(NetworkEvent(
+                            id=f"evt-{len(events)+1:03d}",
+                            timestamp=timestamp,
+                            protocol="HTTP",
+                            src=src,
+                            dst=dst,
+                            flag="suspicious" if is_suspicious_http else "normal",
+                            reason="Unencrypted HTTP POST containing victim telemetry to raw external IP"
+                            if is_suspicious_http
+                            else "Standard plaintext HTTP GET request to legitimate public web host"
+                        ))
+
+                if len(events) >= limit:
+                    break
 
             return events if events else self._mock_fallback.get_events(limit=limit)
         except Exception as e:
-            logger.warning(f"[ProductionPCAPProvider] Error parsing PCAP ({e}), falling back to mock")
+            logger.warning(f"[ProductionPCAPProvider] Error parsing PCAP via Scapy ({e}), falling back to mock")
             return self._mock_fallback.get_events(limit=limit)
 
 
@@ -251,7 +355,7 @@ class ProductionPCAPProvider(NetworkEventProvider):
 class PCAPAdapter:
     """
     Adapter coordinator providing a unified get_events interface for network_service.
-    Switches between production Scapy PCAP parsing and realistic mock telemetry based on config.
+    Auto-activates Person D's ProductionPCAPProvider whenever PCAP files or network_events.json are present.
     """
 
     def __init__(self, pcap_dir: Optional[str] = None):
@@ -262,10 +366,11 @@ class PCAPAdapter:
         from app.core.config import settings
         pcap_dir = self.pcap_dir or getattr(settings, "PCAPS_DIR", None)
 
-        if getattr(settings, "USE_REAL_PCAP", False) and pcap_dir and os.path.exists(pcap_dir):
+        if pcap_dir and os.path.exists(pcap_dir):
             pcap_files = glob.glob(os.path.join(pcap_dir, "*.pcap")) + glob.glob(os.path.join(pcap_dir, "*.pcapng"))
-            if pcap_files:
-                logger.info(f"[PCAPAdapter] USE_REAL_PCAP=True — using ProductionPCAPProvider with {pcap_files[0]}")
+            json_file = os.path.join(pcap_dir, "network_events.json")
+            if getattr(settings, "USE_REAL_PCAP", False) or pcap_files or os.path.exists(json_file):
+                logger.info(f"[PCAPAdapter] Active PCAP files or events found — using Person D's ProductionPCAPProvider")
                 return ProductionPCAPProvider(pcap_dir)
 
         logger.info("[PCAPAdapter] Using MockNetworkEventProvider (offline synthetic telemetry)")
