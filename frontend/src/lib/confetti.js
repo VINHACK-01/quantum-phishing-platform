@@ -4,7 +4,7 @@ export function triggerCyberConfetti() {
   const count = 200;
   const defaults = {
     origin: { y: 0.7 },
-    colors: ['#06b6d4', '#8b5cf6', '#10b981', '#38bdf8', '#c084fc'],
+    colors: ['#ef4444', '#dc2626', '#b91c1c', '#ffffff', '#737373'],
   };
 
   function fire(particleRatio, opts) {

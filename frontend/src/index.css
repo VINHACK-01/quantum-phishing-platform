@@ -27,8 +27,8 @@
 
     --risk-low: #a1a1aa;
     --risk-low-bg: rgba(161, 161, 170, 0.1);
-    --risk-medium: #f59e0b;
-    --risk-medium-bg: rgba(245, 158, 11, 0.12);
+    --risk-medium: #f87171;
+    --risk-medium-bg: rgba(239, 68, 68, 0.12);
     --risk-high: #ef4444;
     --risk-high-bg: rgba(239, 68, 68, 0.15);
   }
@@ -43,7 +43,7 @@
     overflow-x: hidden;
   }
 
-  h1, h2, h3, .font-display {
+  h1, h2, h3, h4, h5, h6, .font-display {
     font-family: 'Bebas Neue', sans-serif, system-ui;
     letter-spacing: 0.04em;
   }
@@ -83,7 +83,7 @@
 .risk-badge-medium {
   background-color: var(--risk-medium-bg);
   color: var(--risk-medium);
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
 .risk-badge-high {

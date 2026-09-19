@@ -82,7 +82,7 @@ export default function QuantumCanvas({ className = '' }) {
         dx: 0,
         dy: 0,
         baseSize: 2 + Math.random() * 2.5,
-        color: i % 3 === 0 ? '#00f0ff' : i % 3 === 1 ? '#a855f7' : '#10b981',
+        color: i % 3 === 0 ? '#ef4444' : i % 3 === 1 ? '#dc2626' : '#ffffff',
         pulse: Math.random() * Math.PI * 2,
         speed: 0.02 + Math.random() * 0.02,
       });
@@ -108,13 +108,19 @@ export default function QuantumCanvas({ className = '' }) {
       const centerY = height / 2;
 
       // Rotate camera gently over time + follow mouse tilt
+      rotX += 0.002;
       rotY += 0.003;
-      rotX = Math.sin(time * 0.0005) * 0.15;
 
-      const cosY = Math.cos(rotY);
-      const sinY = Math.sin(rotY);
-      const cosX = Math.cos(rotX);
-      const sinX = Math.sin(rotX);
+      const targetRotX = (mouseRef.current.y / height - 0.5) * 0.4;
+      const targetRotY = (mouseRef.current.x / width - 0.5) * 0.4;
+
+      const currentRotX = rotX + targetRotX;
+      const currentRotY = rotY + targetRotY;
+
+      const cosX = Math.cos(currentRotX);
+      const sinX = Math.sin(currentRotX);
+      const cosY = Math.cos(currentRotY);
+      const sinY = Math.sin(currentRotY);
 
       // Smooth mouse lerp
       const mouse = mouseRef.current;
@@ -129,13 +135,13 @@ export default function QuantumCanvas({ className = '' }) {
 
         ctx.beginPath();
         ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(6, 182, 212, ${sw.opacity})`;
+        ctx.strokeStyle = `rgba(239, 68, 68, ${sw.opacity})`;
         ctx.lineWidth = 2.5;
         ctx.stroke();
 
         ctx.beginPath();
         ctx.arc(sw.x, sw.y, sw.radius * 0.8, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(168, 85, 247, ${sw.opacity * 0.6})`;
+        ctx.strokeStyle = `rgba(220, 38, 38, ${sw.opacity * 0.6})`;
         ctx.lineWidth = 1;
         ctx.stroke();
 
@@ -210,8 +216,8 @@ export default function QuantumCanvas({ className = '' }) {
             ctx.lineTo(p2.x, p2.y);
 
             const gradient = ctx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
-            gradient.addColorStop(0, `rgba(6, 182, 212, ${alpha})`);
-            gradient.addColorStop(1, `rgba(168, 85, 247, ${alpha})`);
+            gradient.addColorStop(0, `rgba(239, 68, 68, ${alpha})`);
+            gradient.addColorStop(1, `rgba(220, 38, 38, ${alpha})`);
             ctx.strokeStyle = gradient;
             ctx.lineWidth = 0.75 * p1.scale;
             ctx.stroke();
@@ -232,11 +238,11 @@ export default function QuantumCanvas({ className = '' }) {
         // Subtle Quantum Halo
         ctx.beginPath();
         ctx.arc(p.x, p.y, rad * 2.4, 0, Math.PI * 2);
-        ctx.fillStyle = p.color === '#00f0ff'
-          ? 'rgba(6, 182, 212, 0.15)'
-          : p.color === '#a855f7'
-          ? 'rgba(168, 85, 247, 0.15)'
-          : 'rgba(16, 185, 129, 0.15)';
+        ctx.fillStyle = p.color === '#ef4444'
+          ? 'rgba(239, 68, 68, 0.2)'
+          : p.color === '#dc2626'
+          ? 'rgba(220, 38, 38, 0.2)'
+          : 'rgba(255, 255, 255, 0.2)';
         ctx.fill();
       });
 
@@ -280,27 +286,27 @@ export default function QuantumCanvas({ className = '' }) {
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
-      className={`relative w-full h-[320px] rounded-2xl overflow-hidden border border-cyan-500/30 bg-gradient-to-b from-slate-950 via-slate-900/90 to-slate-950 shadow-[0_0_40px_rgba(6,182,212,0.12)] cursor-crosshair select-none ${className}`}
+      className={`relative w-full h-[320px] rounded-2xl overflow-hidden border border-red-900/40 bg-[#080808] shadow-[0_0_40px_rgba(239,68,68,0.15)] cursor-crosshair select-none ${className}`}
     >
       {/* Background Cyber Grid */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:28px_28px] opacity-40 pointer-events-none" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#171717_1px,transparent_1px),linear-gradient(to_bottom,#171717_1px,transparent_1px)] bg-[size:28px_28px] opacity-40 pointer-events-none" />
 
       {/* Interactive Canvas */}
       <canvas ref={canvasRef} className="absolute inset-0 block w-full h-full" />
 
       {/* Top Left HUD Telemetry */}
       <div className="absolute top-3.5 left-4 flex items-center gap-3 pointer-events-none">
-        <div className="flex items-center gap-2 px-2.5 py-1 rounded-md bg-slate-950/80 backdrop-blur-md border border-cyan-500/40 text-[11px] font-mono text-cyan-300 shadow">
-          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+        <div className="flex items-center gap-2 px-2.5 py-1 rounded-md bg-[#050505]/90 backdrop-blur-md border border-red-900/40 text-[11px] font-mono text-red-300 shadow">
+          <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
           <span>VQC LATTICE: SIMULATING</span>
         </div>
-        <div className="hidden sm:flex items-center gap-1.5 px-2 py-0.5 rounded bg-slate-900/80 border border-slate-800 text-[10px] font-mono text-slate-400">
+        <div className="hidden sm:flex items-center gap-1.5 px-2 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-[10px] font-mono text-neutral-400">
           <span>FPS:</span>
-          <span className="text-emerald-400 font-bold">{fps}</span>
+          <span className="text-white font-bold">{fps}</span>
         </div>
-        <div className="hidden md:flex items-center gap-1.5 px-2 py-0.5 rounded bg-slate-900/80 border border-slate-800 text-[10px] font-mono text-slate-400">
+        <div className="hidden md:flex items-center gap-1.5 px-2 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-[10px] font-mono text-neutral-400">
           <span>PULSES:</span>
-          <span className="text-purple-400 font-bold">{pulseCount}</span>
+          <span className="text-red-400 font-bold">{pulseCount}</span>
         </div>
       </div>
 
@@ -311,10 +317,10 @@ export default function QuantumCanvas({ className = '' }) {
             playClick();
             setMode(mode === 'quantum' ? 'sphere' : 'quantum');
           }}
-          className="px-2.5 py-1 rounded-md bg-slate-900/90 hover:bg-slate-800 text-slate-200 text-xs font-mono border border-slate-700 hover:border-cyan-500/50 transition-all flex items-center gap-1.5 cursor-pointer shadow"
+          className="px-2.5 py-1 rounded-md bg-neutral-900 hover:bg-neutral-800 text-neutral-200 text-xs font-mono border border-neutral-800 hover:border-red-900/50 transition-all flex items-center gap-1.5 cursor-pointer shadow"
           title="Toggle Lattice Geometry"
         >
-          <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+          <Sparkles className="w-3.5 h-3.5 text-red-500" />
           <span className="capitalize">{mode} Mode</span>
         </button>
 
@@ -326,18 +332,18 @@ export default function QuantumCanvas({ className = '' }) {
               triggerShockwave(rect.width / 2, rect.height / 2);
             }
           }}
-          className="px-3 py-1 rounded-md bg-gradient-to-r from-cyan-600 to-purple-600 hover:brightness-110 text-white text-xs font-mono font-semibold border border-cyan-400/40 shadow-lg shadow-cyan-950/50 flex items-center gap-1.5 cursor-pointer transition-all active:scale-95"
+          className="px-3 py-1 rounded-md bg-red-600 hover:bg-red-700 text-white text-xs font-mono font-semibold border border-red-500/40 shadow-lg shadow-red-950/50 flex items-center gap-1.5 cursor-pointer transition-all active:scale-95"
         >
-          <Zap className="w-3.5 h-3.5 text-yellow-300" />
+          <Zap className="w-3.5 h-3.5 text-white" />
           <span>Shockwave</span>
         </button>
       </div>
 
       {/* Bottom Center Click Instruction Pill */}
       <div className="absolute bottom-3 inset-x-0 flex justify-center pointer-events-none">
-        <div className="px-3 py-1 rounded-full bg-slate-950/80 backdrop-blur-md border border-slate-800/80 text-[10px] font-mono text-slate-400 flex items-center gap-2">
-          <span className="text-cyan-400">⚡ Interactive Bruno Simon Canvas</span>
-          <span className="text-slate-600">•</span>
+        <div className="px-3 py-1 rounded-full bg-[#050505]/90 backdrop-blur-md border border-neutral-800 text-[10px] font-mono text-neutral-400 flex items-center gap-2">
+          <span className="text-red-500">⚡ Interactive Bruno Simon Canvas</span>
+          <span className="text-neutral-600">•</span>
           <span>Hover to repel • Click to blast shockwave</span>
         </div>
       </div>

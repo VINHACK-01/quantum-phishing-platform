@@ -38,21 +38,21 @@ export default function HistoryTable({ historyData, onSelectScan, isLoading }) {
   };
 
   return (
-    <div className="relative rounded-2xl border border-slate-800/80 bg-gradient-to-b from-slate-900/90 via-slate-950 to-slate-950 p-6 shadow-2xl space-y-4">
+    <div className="relative rounded-2xl border border-neutral-800 bg-[#080808] p-6 shadow-2xl space-y-4">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-slate-900 text-cyan-400 border border-slate-800 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
+          <div className="p-2.5 rounded-xl bg-neutral-900 text-red-500 border border-neutral-800 shadow-[0_0_15px_rgba(239,68,68,0.2)]">
             <History className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-white font-mono flex items-center gap-2">
+            <h3 className="text-2xl font-display text-white tracking-wide flex items-center gap-2">
               <span>Scan Audit History Log</span>
               <Badge variant="secondary" className="text-[10px]">
                 {scans.length} Scans Archived
               </Badge>
             </h3>
-            <p className="text-xs text-slate-400">Chronological FIFO queue of previous quantum threat assessments</p>
+            <p className="text-xs text-neutral-400">Chronological FIFO queue of previous quantum threat assessments</p>
           </div>
         </div>
 
@@ -60,30 +60,30 @@ export default function HistoryTable({ historyData, onSelectScan, isLoading }) {
         <button
           onClick={handleExportCsv}
           disabled={scans.length === 0}
-          className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 text-xs font-mono flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+          className="px-3 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white border border-neutral-800 text-xs font-mono flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
         >
-          <Download className="w-3.5 h-3.5 text-cyan-400" />
+          <Download className="w-3.5 h-3.5 text-red-500" />
           <span>Export CSV</span>
         </button>
       </div>
 
       {/* Search Filter */}
       <div className="relative max-w-sm">
-        <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+        <Search className="w-3.5 h-3.5 text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Filter audit log by domain, ID, or risk..."
-          className="w-full pl-9 pr-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-xs font-mono text-slate-200 placeholder-slate-600 focus:outline-none focus:border-cyan-500 transition-all"
+          className="w-full pl-9 pr-3 py-1.5 bg-[#050505] border border-neutral-800 rounded-lg text-xs font-mono text-neutral-200 placeholder-neutral-600 focus:outline-none focus:border-red-600 transition-all"
         />
       </div>
 
       {/* History Table */}
-      <div className="overflow-x-auto rounded-xl border border-slate-800/80 bg-slate-950/80 shadow-inner">
+      <div className="overflow-x-auto rounded-xl border border-neutral-800 bg-[#050505] shadow-inner">
         <table className="w-full text-left border-collapse text-xs font-mono">
           <thead>
-            <tr className="bg-slate-900/90 border-b border-slate-800 text-slate-400 uppercase text-[10px] tracking-wider">
+            <tr className="bg-neutral-900 border-b border-neutral-800 text-neutral-400 uppercase text-[10px] tracking-wider">
               <th className="py-3 px-3.5">Scan ID</th>
               <th className="py-3 px-3.5">Evaluated Target Domain</th>
               <th className="py-3 px-3.5">Risk Assessment</th>
@@ -92,7 +92,7 @@ export default function HistoryTable({ historyData, onSelectScan, isLoading }) {
               <th className="py-3 px-2 text-right">Action</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-800/50 tracking-tight">
+          <tbody className="divide-y divide-neutral-800 tracking-tight">
             {filteredScans.length > 0 ? (
               filteredScans.map((scan) => {
                 const rawProb = typeof scan.phishing_probability === 'number' ? scan.phishing_probability : 0;
@@ -108,13 +108,13 @@ export default function HistoryTable({ historyData, onSelectScan, isLoading }) {
                       playClick();
                       onSelectScan && onSelectScan(scan);
                     }}
-                    className="hover:bg-slate-900/80 transition-colors cursor-pointer group"
+                    className="hover:bg-neutral-900 transition-colors cursor-pointer group"
                     title="Click to load into URL threat inspector"
                   >
-                    <td className="py-3 px-3.5 text-cyan-400 font-semibold group-hover:underline">
+                    <td className="py-3 px-3.5 text-red-400 font-semibold group-hover:underline">
                       {scan.id || 'scan-N/A'}
                     </td>
-                    <td className="py-3 px-3.5 text-slate-200 max-w-xs truncate" title={scan.url}>
+                    <td className="py-3 px-3.5 text-white max-w-xs truncate" title={scan.url}>
                       {scan.url}
                     </td>
                     <td className="py-3 px-3.5">
@@ -122,15 +122,15 @@ export default function HistoryTable({ historyData, onSelectScan, isLoading }) {
                         {scan.risk_level || (isHigh ? 'HIGH' : isMedium ? 'MEDIUM' : 'LOW')}
                       </Badge>
                     </td>
-                    <td className="py-3 px-3.5 font-bold text-slate-200">
+                    <td className="py-3 px-3.5 font-bold text-white">
                       {probPercent}%
                     </td>
-                    <td className="py-3 px-3.5 text-slate-400 text-[11px]">
+                    <td className="py-3 px-3.5 text-neutral-400 text-[11px]">
                       {scan.timestamp ? (
                         isNaN(new Date(scan.timestamp).getTime()) ? scan.timestamp : new Date(scan.timestamp).toLocaleTimeString()
                       ) : 'N/A'}
                     </td>
-                    <td className="py-3 px-2 text-right text-slate-500 group-hover:text-cyan-400">
+                    <td className="py-3 px-2 text-right text-neutral-500 group-hover:text-red-400">
                       <ArrowUpRight className="w-4 h-4 ml-auto" />
                     </td>
                   </tr>
@@ -138,7 +138,7 @@ export default function HistoryTable({ historyData, onSelectScan, isLoading }) {
               })
             ) : (
               <tr>
-                <td colSpan={6} className="py-8 text-center text-slate-500 font-mono text-xs">
+                <td colSpan={6} className="py-8 text-center text-neutral-500 font-mono text-xs">
                   {isLoading ? 'Retrieving audit history...' : 'No scan history matching the active query.'}
                 </td>
               </tr>

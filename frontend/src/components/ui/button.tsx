@@ -15,13 +15,13 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     const variantClasses = {
-      default: 'bg-cyan-600 hover:bg-cyan-500 text-white shadow-lg shadow-cyan-950/50 border border-cyan-400/30',
-      destructive: 'bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-950/50 border border-rose-400/30',
-      outline: 'border border-slate-700 bg-slate-900/60 hover:bg-slate-800 text-slate-200 hover:text-white',
-      secondary: 'bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700',
-      ghost: 'hover:bg-slate-800/80 text-slate-300 hover:text-white',
-      quantum: 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-lg shadow-purple-950/60 border border-purple-400/40',
-      cyber: 'bg-gradient-to-r from-cyan-600 via-teal-600 to-blue-600 hover:brightness-110 text-white shadow-[0_0_20px_rgba(6,182,212,0.35)] border border-cyan-400/50 font-bold',
+      default: 'bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-950/50 border border-red-500/30',
+      destructive: 'bg-red-950 hover:bg-red-900 text-red-300 border border-red-900/60',
+      outline: 'border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-200 hover:text-white',
+      secondary: 'bg-neutral-900 hover:bg-neutral-800 text-neutral-100 border border-neutral-800',
+      ghost: 'hover:bg-neutral-800/80 text-neutral-300 hover:text-white',
+      quantum: 'bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-950/60 border border-red-500/40',
+      cyber: 'bg-red-600 hover:bg-red-700 text-white shadow-[0_0_20px_rgba(239,68,68,0.35)] border border-red-500/50 font-bold',
     };
 
     const sizeClasses = {
@@ -36,7 +36,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         onClick={handleClick}
         className={cn(
-          'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 disabled:pointer-events-none disabled:opacity-50 cursor-pointer active:scale-95',
+          'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 disabled:pointer-events-none disabled:opacity-50 cursor-pointer active:scale-95',
           variantClasses[variant],
           sizeClasses[size],
           className

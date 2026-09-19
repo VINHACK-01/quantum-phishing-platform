@@ -14,7 +14,7 @@ export default function ReportsView({ historyData, scanResult }) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-display text-white tracking-wide">Threat Analytics & Benchmark Reports</h2>
+        <h2 className="text-3xl font-display text-white tracking-wide">Threat Analytics & Benchmark Reports</h2>
         <p className="text-xs font-sans text-neutral-400 mt-0.5">Aggregated risk metrics and quantum classifier evaluation statistics</p>
       </div>
 
@@ -28,7 +28,7 @@ export default function ReportsView({ historyData, scanResult }) {
               </svg>
             </span>
             <div>
-              <h3 className="text-lg font-display text-white tracking-wide">Threat Risk Breakdown</h3>
+              <h3 className="text-xl font-display text-white tracking-wide">Threat Risk Breakdown</h3>
               <p className="text-xs font-sans text-neutral-400">Distribution of evaluated scan results</p>
             </div>
           </div>
@@ -48,11 +48,11 @@ export default function ReportsView({ historyData, scanResult }) {
             {/* Medium */}
             <div className="space-y-1">
               <div className="flex justify-between text-xs font-mono">
-                <span className="text-amber-400 font-semibold">MEDIUM RISK</span>
+                <span className="text-red-400 font-semibold">MEDIUM RISK</span>
                 <span className="text-white font-bold">{mediumRisk} ({mediumPercent}%)</span>
               </div>
               <div className="w-full h-2 bg-[#050505] rounded-full overflow-hidden border border-neutral-800">
-                <div className="h-full bg-amber-500 rounded-full" style={{ width: `${mediumPercent}%` }}></div>
+                <div className="h-full bg-red-600 rounded-full" style={{ width: `${mediumPercent}%` }}></div>
               </div>
             </div>
 

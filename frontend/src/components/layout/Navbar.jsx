@@ -1,17 +1,17 @@
 export default function Navbar({ activeView, onViewChange, connectionStatus, onRefreshAll }) {
   const status = connectionStatus || 'Connecting';
 
-  let statusDotColor = 'bg-amber-500 animate-pulse';
-  let statusTextColor = 'text-amber-400';
+  let statusDotColor = 'bg-neutral-500 animate-pulse';
+  let statusTextColor = 'text-neutral-400';
   let statusText = 'Connecting...';
 
   if (status === 'Connected') {
-    statusDotColor = 'bg-emerald-500';
-    statusTextColor = 'text-emerald-400';
-    statusText = 'Connected';
-  } else if (status === 'Offline') {
     statusDotColor = 'bg-red-500';
     statusTextColor = 'text-red-400';
+    statusText = 'Connected';
+  } else if (status === 'Offline') {
+    statusDotColor = 'bg-neutral-600';
+    statusTextColor = 'text-neutral-500';
     statusText = 'Offline (Fallback)';
   }
 
@@ -33,22 +33,22 @@ export default function Navbar({ activeView, onViewChange, connectionStatus, onR
           onClick={() => onViewChange('home')}
           className="flex items-center gap-3 cursor-pointer group"
         >
-          <div className="w-10 h-10 rounded-xl bg-neutral-900 border border-neutral-800 p-0.5 shadow-lg group-hover:border-red-600/60 transition-all flex items-center justify-center">
-            <svg className="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-neutral-900 border border-neutral-800 p-0.5 shadow-lg group-hover:border-red-600/60 transition-all flex items-center justify-center shrink-0">
+            <svg className="w-6 h-6 sm:w-8 sm:h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
             </svg>
           </div>
 
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-display tracking-wider text-white leading-none">
+            <div className="flex items-center gap-2.5">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-display font-black tracking-wider text-white leading-none">
                 Sentinel<span className="text-red-500">AI</span>
               </h1>
-              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-neutral-900 text-neutral-300 border border-neutral-800 uppercase">
+              <span className="text-xs font-mono font-bold px-2.5 py-1 rounded bg-neutral-900 text-neutral-300 border border-neutral-800 uppercase">
                 SOC v1.0
               </span>
             </div>
-            <p className="text-[11px] font-sans text-neutral-400 hidden md:block">
+            <p className="text-xs sm:text-sm font-sans text-neutral-400 hidden md:block mt-1">
               Quantum-Enhanced Phishing Detection & Network Intelligence
             </p>
           </div>

@@ -4,7 +4,7 @@ export default function SettingsView({ connectionStatus }) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-display text-white tracking-wide">Frontend Platform Settings</h2>
+        <h2 className="text-3xl font-display text-white tracking-wide">Frontend Platform Settings</h2>
         <p className="text-xs font-sans text-neutral-400 mt-0.5">System configuration and API endpoint diagnostics</p>
       </div>
 
@@ -19,7 +19,7 @@ export default function SettingsView({ connectionStatus }) {
               </svg>
             </span>
             <div>
-              <h3 className="text-lg font-display text-white tracking-wide">API Connection Endpoint</h3>
+              <h3 className="text-xl font-display text-white tracking-wide">API Connection Endpoint</h3>
               <p className="text-xs font-sans text-neutral-400">Configured backend service host</p>
             </div>
           </div>
@@ -32,7 +32,7 @@ export default function SettingsView({ connectionStatus }) {
 
             <div className="bg-[#050505] p-3 rounded-lg border border-neutral-800 flex items-center justify-between">
               <span className="text-neutral-400">Connection Status</span>
-              <span className={`font-bold ${connectionStatus === 'Connected' ? 'text-emerald-400' : 'text-red-400'}`}>
+              <span className={`font-bold ${connectionStatus === 'Connected' ? 'text-red-400' : 'text-neutral-500'}`}>
                 {connectionStatus}
               </span>
             </div>
@@ -55,7 +55,7 @@ export default function SettingsView({ connectionStatus }) {
               </svg>
             </span>
             <div>
-              <h3 className="text-sm font-bold text-white">Cyber Security Theme Tokens</h3>
+              <h3 className="text-base font-bold text-white">Cyber Security Theme Tokens</h3>
               <p className="text-xs text-neutral-400">SOC color system specs</p>
             </div>
           </div>

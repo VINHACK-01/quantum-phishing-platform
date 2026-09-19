@@ -9,7 +9,7 @@ export default function HomeView({ onLaunchDetection }) {
             Quantum-Enhanced Phishing Detection & Cyber Threat Intelligence
           </div>
 
-          <h1 className="text-5xl sm:text-7xl font-display text-white tracking-wide leading-none">
+          <h1 className="text-6xl sm:text-8xl font-display text-white tracking-wide leading-none">
             Real-Time Threat Intelligence Powered by <span className="text-red-500">Quantum AI</span>
           </h1>
 
@@ -42,25 +42,25 @@ export default function HomeView({ onLaunchDetection }) {
       <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="nexus-card p-5 text-center space-y-1">
           <span className="text-xs font-sans font-bold text-neutral-400 uppercase tracking-wider block">Classical RF Accuracy</span>
-          <div className="text-3xl sm:text-4xl font-display text-white tracking-wide">91.8%</div>
+          <div className="text-4xl sm:text-5xl font-display text-white tracking-wide">91.8%</div>
           <span className="text-[11px] font-sans text-neutral-500 block">High-dimensional decision tree</span>
         </div>
 
         <div className="nexus-card p-5 text-center space-y-1">
           <span className="text-xs font-sans font-bold text-red-400 uppercase tracking-wider block">Quantum VQC Metric</span>
-          <div className="text-3xl sm:text-4xl font-display text-white tracking-wide">74.2%</div>
+          <div className="text-4xl sm:text-5xl font-display text-white tracking-wide">74.2%</div>
           <span className="text-[11px] font-sans text-neutral-500 block">PennyLane Hilbert classifier</span>
         </div>
 
         <div className="nexus-card p-5 text-center space-y-1">
           <span className="text-xs font-sans font-bold text-neutral-400 uppercase tracking-wider block">PCAP Telemetry</span>
-          <div className="text-3xl sm:text-4xl font-display text-white tracking-wide">5s Feed</div>
+          <div className="text-4xl sm:text-5xl font-display text-white tracking-wide">5s Feed</div>
           <span className="text-[11px] font-sans text-neutral-500 block">Real-time packet inspection</span>
         </div>
 
         <div className="nexus-card p-5 text-center space-y-1">
-          <span className="text-xs font-sans font-bold text-emerald-400 uppercase tracking-wider block">API Status</span>
-          <div className="text-3xl sm:text-4xl font-display text-white tracking-wide">ONLINE</div>
+          <span className="text-xs font-sans font-bold text-red-400 uppercase tracking-wider block">API Status</span>
+          <div className="text-4xl sm:text-5xl font-display text-white tracking-wide">ONLINE</div>
           <span className="text-[11px] font-sans text-neutral-500 block">FastAPI Server at :8000</span>
         </div>
       </section>
@@ -68,7 +68,7 @@ export default function HomeView({ onLaunchDetection }) {
       {/* Feature Pillars Section */}
       <section id="pillars" className="space-y-6">
         <div className="text-center sm:text-left space-y-1">
-          <h2 className="text-3xl font-display text-white tracking-wide">Core Security Pillars</h2>
+          <h2 className="text-4xl font-display text-white tracking-wide">Core Security Pillars</h2>
           <p className="text-xs font-sans text-neutral-400">Multi-layered detection pipeline built for modern security operations</p>
         </div>
 
@@ -80,7 +80,7 @@ export default function HomeView({ onLaunchDetection }) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
-            <h3 className="text-xl font-display text-white tracking-wide">Lexical & Entropy Analysis</h3>
+            <h3 className="text-3xl font-display text-white tracking-wide">Lexical & Entropy Analysis</h3>
             <p className="text-xs font-sans text-neutral-400 leading-relaxed">
               Extracts subdomain depth, brand spoofing keywords, character entropy, and raw IP host patterns to identify zero-day phishing links.
             </p>
@@ -93,7 +93,7 @@ export default function HomeView({ onLaunchDetection }) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
               </svg>
             </div>
-            <h3 className="text-xl font-display text-white tracking-wide">Quantum VQC Benchmark</h3>
+            <h3 className="text-3xl font-display text-white tracking-wide">Quantum VQC Benchmark</h3>
             <p className="text-xs font-sans text-neutral-400 leading-relaxed">
               Evaluates PennyLane Variational Quantum Classifier performance against classical Random Forest models in Hilbert feature space.
             </p>
@@ -106,7 +106,7 @@ export default function HomeView({ onLaunchDetection }) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
               </svg>
             </div>
-            <h3 className="text-xl font-display text-white tracking-wide">PCAP Network Telemetry</h3>
+            <h3 className="text-3xl font-display text-white tracking-wide">PCAP Network Telemetry</h3>
             <p className="text-xs font-sans text-neutral-400 leading-relaxed">
               Streams replayed network traffic logs, flagging high-entropy DGA DNS queries and plaintext credentials POSTed to raw external IPs.
             </p>

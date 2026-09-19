@@ -5,22 +5,22 @@ import { Badge } from '@/components/ui/badge';
 export default function QuantumComparison({ comparisonData }) {
   if (!comparisonData) {
     return (
-      <div className="relative rounded-2xl border border-slate-800/80 bg-slate-950 p-6 shadow-xl space-y-3">
+      <div className="relative rounded-2xl border border-neutral-800 bg-[#050505] p-6 shadow-xl space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-purple-950/80 text-purple-400 border border-purple-800/80">
+            <div className="p-2 rounded-xl bg-red-950/60 text-red-400 border border-red-900/60">
               <Cpu className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-white font-mono flex items-center gap-2">
+              <h3 className="text-2xl font-display text-white tracking-wide flex items-center gap-2">
                 <span>Quantum VQC vs. Classical Benchmark</span>
                 <Badge variant="quantum" className="text-[10px]">PennyLane</Badge>
               </h3>
-              <p className="text-xs text-slate-400">Variational Quantum Classifier Hilbert-space performance comparison</p>
+              <p className="text-xs text-neutral-400">Variational Quantum Classifier Hilbert-space performance comparison</p>
             </div>
           </div>
         </div>
-        <p className="text-xs text-slate-500 font-mono">
+        <p className="text-xs text-neutral-500 font-mono">
           Run a URL threat inspection to render live PennyLane VQC state vector comparison against classical Random Forest.
         </p>
       </div>
@@ -36,27 +36,26 @@ export default function QuantumComparison({ comparisonData }) {
 
   // Speedup delta
   const deltaAcc = (quantumVal - classicalVal) * 100;
-  const isQuantumAhead = deltaAcc >= 0;
 
   return (
-    <div className="relative rounded-2xl border border-purple-500/30 bg-gradient-to-b from-slate-900/90 via-slate-950 to-slate-950 p-6 shadow-2xl space-y-4">
+    <div className="relative rounded-2xl border border-red-900/40 bg-[#080808] p-6 shadow-2xl space-y-4">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/80 pb-3.5">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-800 pb-3.5">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-xl bg-purple-950/90 text-purple-400 border border-purple-800 shadow-[0_0_15px_rgba(168,85,247,0.3)]">
+          <div className="p-2 rounded-xl bg-red-950/60 text-red-400 border border-red-900/60 shadow-[0_0_15px_rgba(239,68,68,0.2)]">
             <Cpu className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-white font-mono flex items-center gap-2">
+            <h3 className="text-2xl font-display text-white tracking-wide flex items-center gap-2">
               <span>Quantum Advantage Benchmark</span>
               <Badge variant="quantum" className="text-[10px]">VQC 4-Qubit</Badge>
             </h3>
-            <p className="text-xs text-slate-400">Parameterized Variational Quantum Circuit vs Scikit-Learn Random Forest</p>
+            <p className="text-xs text-neutral-400">Parameterized Variational Quantum Circuit vs Scikit-Learn Random Forest</p>
           </div>
         </div>
 
-        <div className="px-3 py-1 rounded-full bg-purple-950/60 border border-purple-800/80 text-[11px] font-mono text-purple-300 flex items-center gap-1.5">
-          <Zap className="w-3.5 h-3.5 text-yellow-400" />
+        <div className="px-3 py-1 rounded-full bg-red-950/60 border border-red-900/60 text-[11px] font-mono text-red-300 flex items-center gap-1.5">
+          <Zap className="w-3.5 h-3.5 text-red-400" />
           <span>+{Math.abs(deltaAcc).toFixed(1)}% Quantum Gain</span>
         </div>
       </div>
@@ -64,78 +63,78 @@ export default function QuantumComparison({ comparisonData }) {
       {/* Side-by-Side Model Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
         {/* Classical Random Forest */}
-        <div className="p-4 rounded-xl bg-slate-950/90 border border-blue-900/50 space-y-2.5">
+        <div className="p-4 rounded-xl bg-[#050505] border border-neutral-800 space-y-2.5">
           <div className="flex justify-between items-center text-xs">
-            <span className="font-mono text-blue-400 font-semibold flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-blue-500" />
+            <span className="font-mono text-neutral-400 font-semibold flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-neutral-500" />
               Classical Random Forest
             </span>
-            <span className="font-mono font-black text-blue-300 text-sm">{classicalPercent}%</span>
+            <span className="font-mono font-black text-neutral-300 text-sm">{classicalPercent}%</span>
           </div>
-          <div className="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-blue-950">
+          <div className="w-full h-2.5 bg-neutral-900 rounded-full overflow-hidden p-0.5 border border-neutral-800">
             <div
-              className="h-full bg-blue-500 rounded-full transition-all duration-700"
+              className="h-full bg-neutral-400 rounded-full transition-all duration-700"
               style={{ width: `${Math.min(100, Math.max(5, classicalVal * 100))}%` }}
             />
           </div>
-          <div className="flex justify-between items-center text-[10px] font-mono text-slate-500">
+          <div className="flex justify-between items-center text-[10px] font-mono text-neutral-500">
             <span>Metric: Accuracy (Acc)</span>
-            <span className="text-slate-300 font-semibold">{classicalVal}</span>
+            <span className="text-white font-semibold">{classicalVal}</span>
           </div>
         </div>
 
         {/* Quantum VQC */}
-        <div className="p-4 rounded-xl bg-slate-950/90 border border-purple-500/50 space-y-2.5 shadow-[0_0_20px_rgba(168,85,247,0.15)]">
+        <div className="p-4 rounded-xl bg-[#050505] border border-red-900/50 space-y-2.5 shadow-[0_0_20px_rgba(239,68,68,0.15)]">
           <div className="flex justify-between items-center text-xs">
-            <span className="font-mono text-purple-400 font-semibold flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-purple-500 animate-ping" />
+            <span className="font-mono text-red-500 font-semibold flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
               Quantum VQC Engine
             </span>
-            <span className="font-mono font-black text-purple-300 text-sm">{quantumPercent}%</span>
+            <span className="font-mono font-black text-red-400 text-sm">{quantumPercent}%</span>
           </div>
-          <div className="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-purple-950">
+          <div className="w-full h-2.5 bg-neutral-900 rounded-full overflow-hidden p-0.5 border border-red-950">
             <div
-              className="h-full bg-gradient-to-r from-purple-500 to-cyan-400 rounded-full transition-all duration-700 shadow-[0_0_10px_#a855f7]"
+              className="h-full bg-red-600 rounded-full transition-all duration-700 shadow-[0_0_10px_#ef4444]"
               style={{ width: `${Math.min(100, Math.max(5, quantumVal * 100))}%` }}
             />
           </div>
-          <div className="flex justify-between items-center text-[10px] font-mono text-slate-500">
+          <div className="flex justify-between items-center text-[10px] font-mono text-neutral-500">
             <span>Metric: Accuracy (Acc)</span>
-            <span className="text-purple-300 font-semibold">{quantumVal}</span>
+            <span className="text-red-400 font-semibold">{quantumVal}</span>
           </div>
         </div>
       </div>
 
       {/* Simulated Quantum Circuit Diagram Representation */}
-      <div className="p-3.5 rounded-xl bg-slate-950/80 border border-slate-900 font-mono text-xs space-y-2">
-        <div className="flex items-center justify-between text-[11px] text-slate-400">
-          <span className="text-slate-300 flex items-center gap-1.5">
-            <GitCommit className="w-3.5 h-3.5 text-cyan-400" />
+      <div className="p-3.5 rounded-xl bg-[#050505] border border-neutral-900 font-mono text-xs space-y-2">
+        <div className="flex items-center justify-between text-[11px] text-neutral-400">
+          <span className="text-white flex items-center gap-1.5">
+            <GitCommit className="w-3.5 h-3.5 text-red-500" />
             <span>PennyLane Ansatz Architecture:</span>
           </span>
-          <span className="text-purple-400">4 Qubits | Depth 3</span>
+          <span className="text-red-400">4 Qubits | Depth 3</span>
         </div>
 
         {/* Circuit Gates Representation */}
         <div className="overflow-x-auto py-1">
           <div className="flex items-center gap-2 text-[10px] font-mono whitespace-nowrap min-w-max">
-            <span className="px-2 py-1 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-800">
+            <span className="px-2 py-1 rounded bg-neutral-900 text-neutral-300 border border-neutral-800">
               |0000⟩ Input
             </span>
-            <span className="text-slate-600">→</span>
-            <span className="px-2 py-1 rounded bg-purple-950/80 text-purple-300 border border-purple-800">
+            <span className="text-neutral-600">→</span>
+            <span className="px-2 py-1 rounded bg-neutral-900 text-neutral-300 border border-neutral-800">
               Hadamard [H⊗4]
             </span>
-            <span className="text-slate-600">→</span>
-            <span className="px-2 py-1 rounded bg-indigo-950/80 text-indigo-300 border border-indigo-800">
+            <span className="text-neutral-600">→</span>
+            <span className="px-2 py-1 rounded bg-neutral-900 text-neutral-300 border border-neutral-800">
               Rotations Ry(θ)
             </span>
-            <span className="text-slate-600">→</span>
-            <span className="px-2 py-1 rounded bg-purple-950/80 text-purple-300 border border-purple-800">
+            <span className="text-neutral-600">→</span>
+            <span className="px-2 py-1 rounded bg-neutral-900 text-neutral-300 border border-neutral-800">
               Entangling CNOT Ring
             </span>
-            <span className="text-slate-600">→</span>
-            <span className="px-2 py-1 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-800">
+            <span className="text-neutral-600">→</span>
+            <span className="px-2 py-1 rounded bg-red-950/60 text-red-300 border border-red-900/60">
               Pauli-Z Measurement ⟨σz⟩
             </span>
           </div>

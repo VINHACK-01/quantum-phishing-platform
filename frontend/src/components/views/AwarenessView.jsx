@@ -32,7 +32,7 @@ export default function AwarenessView({ activeTrainingData }) {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-display text-white tracking-wide">Cyber Awareness & Threat Knowledge Hub</h2>
+        <h2 className="text-3xl font-display text-white tracking-wide">Cyber Awareness & Threat Knowledge Hub</h2>
         <p className="text-xs font-sans text-neutral-400 mt-0.5">Interactive security training modules based on real threat vectors</p>
       </div>
 
@@ -57,7 +57,7 @@ export default function AwarenessView({ activeTrainingData }) {
               </span>
             </div>
 
-            <h3 className="text-lg font-display text-white tracking-wide">{mod.title}</h3>
+            <h3 className="text-2xl sm:text-3xl font-display text-white tracking-wide">{mod.title}</h3>
             <p className="text-xs font-sans text-neutral-400 leading-relaxed">{mod.description}</p>
 
             <div className="pt-2 border-t border-neutral-800 text-xs font-sans text-neutral-300 flex items-start gap-2">

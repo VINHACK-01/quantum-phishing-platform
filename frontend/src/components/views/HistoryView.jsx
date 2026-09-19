@@ -22,7 +22,7 @@ export default function HistoryView({ historyData, onSelectScan, isLoadingHistor
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-neutral-800 pb-3">
         <div>
-          <h2 className="text-2xl font-display text-white tracking-wide">Scan Audit History</h2>
+          <h2 className="text-3xl font-display text-white tracking-wide">Scan Audit History</h2>
           <p className="text-xs font-sans text-neutral-400 mt-0.5">FIFO memory queue of previous URL threat assessments</p>
         </div>
 

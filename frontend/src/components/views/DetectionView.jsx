@@ -13,7 +13,7 @@ export default function DetectionView({ scanResult, isLoadingScan, scanError, on
       {/* Mode Selector Tabs */}
       <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
         <div>
-          <h2 className="text-2xl font-display text-white tracking-wide">Threat Detection Workspace</h2>
+          <h2 className="text-3xl font-display text-white tracking-wide">Threat Detection Workspace</h2>
           <p className="text-xs font-sans text-neutral-400 mt-0.5">Inspect links and messages for phishing vectors using backend models</p>
         </div>
 
@@ -61,7 +61,7 @@ export default function DetectionView({ scanResult, isLoadingScan, scanError, on
                 </svg>
               </span>
               <div>
-                <h3 className="text-lg font-display text-white tracking-wide flex items-center gap-2">
+                <h3 className="text-xl font-display text-white tracking-wide flex items-center gap-2">
                   Email & SMS Phishing Inspector
                   <span className="text-[10px] font-mono font-normal px-2 py-0.5 rounded bg-neutral-900 text-neutral-300 border border-neutral-800">
                     Frontend Demo Feature
