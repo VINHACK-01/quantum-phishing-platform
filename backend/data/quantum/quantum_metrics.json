@@ -1,0 +1,6 @@
+{
+    "classical_accuracy": 0.884,
+    "quantum_accuracy": 0.806,
+    "qubits_used": 4,
+    "circuit_depth": 3
+}
