@@ -3,7 +3,7 @@ import os
 from ml_training.feature_extraction import extract_features
 
 # 1. Check if the model file exists in the correct backend path
-model_path = "backend/app/data/models/phishing_rf_model.joblib"
+model_path = "backend/data/models/phishing_rf_model.joblib"
 if not os.path.exists(model_path):
     print(f"❌ ERROR: Model file not found at {model_path}")
     exit(1)

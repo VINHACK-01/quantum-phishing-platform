@@ -4,7 +4,7 @@ from urllib.parse import urlparse, unquote
 from feature_extraction import extract_features
 
 # Load your trained Extra Trees model once on startup
-loaded_model = joblib.load("backend/app/data/models/phishing_rf_model.joblib")
+loaded_model = joblib.load("backend/data/models/phishing_rf_model.joblib")
 
 def is_whitelisted(url: str) -> bool:
     """Enterprise-grade whitelist check with an extensive global domain directory, immune to parser exploits and script bypasses."""
