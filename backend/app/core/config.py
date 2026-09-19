@@ -45,8 +45,8 @@ class Settings:
     PCAP_PATH: str = os.getenv("PCAP_PATH", os.path.join(PCAPS_DIR, PCAP_FILENAME))
 
     # 5. Feature toggle flags for mock vs real service providers
-    USE_REAL_MODEL: bool = os.getenv("USE_REAL_MODEL", "false").lower() in ("true", "1", "yes")
-    USE_REAL_PCAP: bool = os.getenv("USE_REAL_PCAP", "false").lower() in ("true", "1", "yes")
+    USE_REAL_MODEL: bool = os.getenv("USE_REAL_MODEL", "true").lower() in ("true", "1", "yes")
+    USE_REAL_PCAP: bool = os.getenv("USE_REAL_PCAP", "true").lower() in ("true", "1", "yes")
 
     def classify_risk(self, probability: float) -> str:
         """Centralized risk level determination based on probability score."""
