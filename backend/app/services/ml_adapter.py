@@ -219,7 +219,79 @@ class MockPredictor(Predictor):
 
 
 # ---------------------------------------------------------------------------
-# ProductionPredictor — placeholder for Person A's trained model
+# Explainability for the REAL model — maps its actual feature vector back
+# into human-readable reasons, same as the mock gives, but grounded in the
+# literal numbers the trained classifier consumed for THIS prediction.
+# ---------------------------------------------------------------------------
+
+# Must stay in the exact same order as feature_extraction.extract_features()
+# index 0 = url_len, 1-13 = character counts, 14 = entropy, 15 = brand_count
+_FEATURE_NAMES: List[str] = [
+    "url_length", "at_symbol_count", "question_mark_count", "hyphen_count",
+    "equals_count", "dot_count", "hash_count", "percent_count", "plus_count",
+    "dollar_count", "exclaim_count", "asterisk_count", "comma_count",
+    "double_slash_count", "entropy", "brand_keyword_count",
+]
+
+
+def _get_feature_importances(pipeline) -> List[float] | None:
+    """
+    Pulls feature_importances_ off the trained model, whether it's a bare
+    estimator or a sklearn Pipeline (checks the last step in that case).
+    Returns None if unavailable so callers can fall back to fixed ordering.
+    """
+    model = pipeline
+    if hasattr(pipeline, "steps"):  # sklearn Pipeline
+        model = pipeline.steps[-1][1]
+    importances = getattr(model, "feature_importances_", None)
+    return list(importances) if importances is not None else None
+
+
+def generate_feature_reasons(features: List[float], pipeline) -> List[str]:
+    """
+    Turns the raw feature vector that was ACTUALLY fed to the model into
+    plain-English reasons. Every reason here corresponds to a real number
+    the classifier used for this exact prediction -- nothing invented.
+
+    If the model exposes feature_importances_, triggered reasons are
+    ranked by how much that feature matters to the model globally, so the
+    most model-relevant explanation surfaces first. Otherwise falls back
+    to a fixed, still-sensible priority order.
+    """
+    url_len, at_c, q_c, hyphen_c, eq_c, dot_c, hash_c, pct_c, plus_c, \
+        dollar_c, excl_c, star_c, comma_c, dslash_c, entropy, brand_c = features
+
+    candidates: List[Tuple[int, str]] = []  # (feature_index, reason text)
+
+    if url_len > 75:
+        candidates.append((0, f"Unusually long URL ({int(url_len)} characters) — often used to hide the real destination"))
+    if at_c >= 1:
+        candidates.append((1, "Contains '@' symbol — a classic technique to redirect users to a hidden destination"))
+    if hyphen_c >= 4:
+        candidates.append((3, f"Excessive hyphens in the URL ({int(hyphen_c)}) — common in spoofed or auto-generated domains"))
+    if dot_c >= 4:
+        candidates.append((5, f"Unusual number of dots/subdomains ({int(dot_c)}) — can indicate domain spoofing"))
+    if pct_c >= 2:
+        candidates.append((7, f"Multiple encoded '%' characters ({int(pct_c)}) — may be obscuring the true URL"))
+    if entropy > 4.0:
+        candidates.append((14, f"High character randomness (entropy={entropy:.2f}) — consistent with algorithmically generated malicious domains"))
+    if brand_c >= 1:
+        candidates.append((15, f"Contains brand or security-related keywords ({int(brand_c)}) — commonly used to impersonate trusted services"))
+    if dslash_c >= 2:
+        candidates.append((13, f"Multiple '//' sequences ({int(dslash_c)}) — possible open-redirect or URL-confusion technique"))
+
+    if not candidates:
+        return ["No individually suspicious structural features detected — flag is based on the combined feature pattern"]
+
+    importances = _get_feature_importances(pipeline)
+    if importances:
+        candidates.sort(key=lambda pair: importances[pair[0]], reverse=True)
+
+    return [reason for _, reason in candidates[:4]]  # top 4 keeps the card readable
+
+
+# ---------------------------------------------------------------------------
+# ProductionPredictor — loads Person A's trained model
 # ---------------------------------------------------------------------------
 
 class ProductionPredictor(Predictor):
@@ -271,12 +343,9 @@ class ProductionPredictor(Predictor):
 
             risk_level = classify_risk(probability)
 
-            # Reasons from trained model based on ml_training logic
-            reasons = []
-            if probability < 0.4:
-                reasons = ["Standard URL structure", "No malicious patterns detected"]
-            else:
-                reasons = ["Machine learning classifier flagged this URL based on structural and lexical features"]
+            # Explainable reasons grounded in the actual feature vector the
+            # model just scored -- not a generic placeholder.
+            reasons = generate_feature_reasons(features, self._pipeline)
 
             return probability, risk_level, reasons
 
